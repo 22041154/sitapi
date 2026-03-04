@@ -1,7 +1,10 @@
 import { AlumnoDatosAcademicos } from "../../dtos/POCOS/alumnos_datos_academicos.entity";
-import { LoginAlumnoResponse } from '../../dtos/responses/auth/login_alumno.response';
+import { DatosLoginAlumno } from '../../dtos/POCOS/datos_logfn_alumno.poco';
 
 export interface IAlumnoDatosAcademicosRepository {
+
   BuscarPorNoControl(noControl: string): Promise<AlumnoDatosAcademicos | null>;
-  ObtenerDatosLoginPorNoControl(noControl: string): Promise<LoginAlumnoResponse | null>;
+
+  ObtenerDatosLoginPorNoControl(noControl: string): Promise<DatosLoginAlumno | null>;
+
 }

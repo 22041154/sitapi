@@ -4,8 +4,9 @@ import { Repository } from 'typeorm';
 import { AlumnoDatosAcademicosEntity } from '../entities/alumnos_datos_academicos.entity';
 import { AlumnoDatosAcademicos } from '../../../dtos/POCOS/alumnos_datos_academicos.entity';
 import { IAlumnoDatosAcademicosRepository } from '../../../domain/interfaces/alumnos_datos_academicos.repository.interface';
-import { LoginAlumnoResponse } from '../../../dtos/responses/auth/login_alumno.response';
 import { AlumnosDatosPersonalesEntity } from '../entities/aluumnos_datos_personales.entity';
+import { CarrerasEntity } from '../entities/carreras.entity';
+import { DatosLoginAlumno } from '../../../dtos/POCOS/datos_logfn_alumno.poco';
 
 @Injectable()
 export class AlumnoDatosAcademicosRepository implements IAlumnoDatosAcademicosRepository {
@@ -21,14 +22,7 @@ export class AlumnoDatosAcademicosRepository implements IAlumnoDatosAcademicosRe
       entity.id_alumno_personal,
       entity.no_control,
       entity.nip,
-      entity.usuario,
-      entity.telefono,
-      entity.tipo_alumno,
-      entity.periodo_ingreso_it,
-      entity.ultimo_periodo_inscrito,
-      entity.promedio_aritmetico_acumulado,
       entity.creditos_aprobados,
-      entity.fecha_actualizacion,
     );
   }
 
@@ -40,7 +34,7 @@ export class AlumnoDatosAcademicosRepository implements IAlumnoDatosAcademicosRe
     return entity ? this.MapearEntidadADominio(entity) : null;
   }
 
-  async ObtenerDatosLoginPorNoControl(noControl: string): Promise<LoginAlumnoResponse | null> {
+  async ObtenerDatosLoginPorNoControl(noControl: string): Promise<DatosLoginAlumno | null> {
     const row = await this.alumnoRepository
       .createQueryBuilder('academico')
       .leftJoin(
@@ -48,10 +42,16 @@ export class AlumnoDatosAcademicosRepository implements IAlumnoDatosAcademicosRe
         'personal',
         'personal.id = academico.id_alumno_personal'
       )
+      .leftJoin(
+        CarrerasEntity,
+        'carrera',
+        'carrera.id = academico.id_carrera'
+      )
       .select([
         'academico.no_control AS matricula',
-        'academico.creditos_aprobados AS creditos_aprobados',
+        'academico.creditos_aprobados AS creditos',
         `CONCAT(personal.nombre, ' ', personal.apellido_paterno, ' ', personal.apellido_materno) AS nombre_completo`,
+        'carrera.nombre_completo AS carrera',
       ])
       .where('academico.no_control = :noControl', { noControl })
       .getRawOne();
@@ -60,15 +60,12 @@ export class AlumnoDatosAcademicosRepository implements IAlumnoDatosAcademicosRe
       return null;
     }
 
-    const response = new LoginAlumnoResponse();
-    response.type = 'alumnos';
-    response.attributes = {
-      nombre_completo: row.nombre_completo,
-      matricula: row.matricula,
-      creditos_aprobados: row.creditos_aprobados,
-    };
-
-    return response;
+    return new DatosLoginAlumno(
+      row.nombre_completo,
+      row.matricula,
+      Number(row.creditos),
+      row.carrera,
+    );
   }
 
 }

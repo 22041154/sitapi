@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { IAlumnoDatosAcademicosRepository } from '../../../domain/interfaces/alumnos_datos_academicos.repository.interface';
 import { LoginAlumnoResponse } from '../../../dtos/responses/auth/login_alumno.response';
+import { LoginAlumnoPresenter } from '../../presenters/auth/login_alumno.presenter';
 
 @Injectable()
 export class IniciarSesionUseCase {
@@ -24,21 +25,20 @@ export class IniciarSesionUseCase {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    const datoLogin = await this.alumnoRepository.ObtenerDatosLoginPorNoControl(noControl);
+    const datosLogin = await this.alumnoRepository.ObtenerDatosLoginPorNoControl(noControl);
 
-    if (!datoLogin) {
+    if (!datosLogin) {
       throw new UnauthorizedException('No se pudieron obtener los datos del alumno');
     }
 
     const payload = {
       sub: alumno.id,
       no_control: alumno.noControl,
-      usuario: alumno.usuario,
     };
 
-    datoLogin.access_token = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload);
 
-    return datoLogin;
+    return LoginAlumnoPresenter.Presentar(datosLogin, accessToken);
   }
 
 }

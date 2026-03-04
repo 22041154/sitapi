@@ -5,7 +5,7 @@ import {
   HttpCode,
   HttpStatus
 } from '@nestjs/common';
-import { IniciarSesionUseCase } from '../../use-cases/auth/iniciar-sesion.use-case';
+import { IniciarSesionUseCase } from '../../logic/auth/iniciar-sesion.use-case';
 import { IniciarSesionDto } from '../../../dtos/requests/iniciar-sesion.dto';
 
 @Controller('auth')

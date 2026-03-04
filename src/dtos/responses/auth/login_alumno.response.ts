@@ -3,9 +3,10 @@ export class LoginAlumnoResponse {
   type: string;
 
   attributes: {
-    nombre_completo: string;
+    nombre: string;
     matricula: string;
-    creditos_aprobados: number;
+    creditos: number;
+    carrera: string;
   };
 
   access_token: string;
