@@ -13,6 +13,8 @@ import { AuthModule } from './infrastructure/security/auth/auth.module';
 import { AlumnoDatosAcademicosModule } from './infrastructure/modules/alumnos_datos_academicos.module';
 import { JwtMiddleware } from './infrastructure/security/auth/jwt.middleware';
 
+import { SsOrganizacionesModule } from './infrastructure/modules/servicio_social/ss_organizaciones.module';
+
 @Module({
   imports: [
     // Configuración global de variables de entorno
@@ -29,6 +31,8 @@ import { JwtMiddleware } from './infrastructure/security/auth/jwt.middleware';
 
     // Módulo de autenticación
     AuthModule,
+
+    SsOrganizacionesModule
   ],
 
   controllers: [
