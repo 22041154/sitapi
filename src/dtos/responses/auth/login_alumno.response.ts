@@ -9,4 +9,7 @@ export class LoginAlumnoResponse {
     carrera: string;
     semestre_activo: boolean;
   };
+
+  access_token: string;
+
 }

@@ -38,7 +38,7 @@ export class IniciarSesionUseCase {
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return LoginAlumnoPresenter.Presentar(datosLogin);
+    return LoginAlumnoPresenter.Presentar(datosLogin, accessToken);
   }
 
 }

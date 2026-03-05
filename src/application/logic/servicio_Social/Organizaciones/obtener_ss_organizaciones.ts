@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { ISsOrganizacionesRepository } from '../../../domain/interfaces/servicio_social/ss_organizaciones.repository';
-import { SsOrganizaciones } from '../../../dtos/POCOS/servicio_social/ss_organizaciones.poco';
+import { ISsOrganizacionesRepository } from '../../../../domain/interfaces/servicio_social/ss_organizaciones';
+import { SsOrganizaciones } from '../../../../dtos/POCOS/servicio_social/ss_organizaciones.poco';
 
 @Injectable()
 export class ObtenerSsOrganizaciones {

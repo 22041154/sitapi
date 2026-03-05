@@ -16,6 +16,8 @@ import { JwtMiddleware } from './infrastructure/security/auth/jwt.middleware';
 import { SsOrganizacionesModule } from './infrastructure/modules/servicio_social/ss_organizaciones.module';
 import { SsTiposProgramasModule } from './infrastructure/modules/servicio_social/ss_tipos_programas.module';
 import { SsProgramasModule } from './infrastructure/modules/servicio_social/ss_programas.module';
+import { SsRolesModule } from './infrastructure/modules/servicio_social/ss_roles.moduke';
+import { SsPermisosModule } from './infrastructure/modules/servicio_social/ss_permisos.module';
 
 @Module({
   imports: [
@@ -36,7 +38,9 @@ import { SsProgramasModule } from './infrastructure/modules/servicio_social/ss_p
 
     SsOrganizacionesModule,
     SsTiposProgramasModule,
-    SsProgramasModule
+    SsProgramasModule,
+    SsRolesModule,
+    SsPermisosModule
   ],
 
   controllers: [
