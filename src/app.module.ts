@@ -14,6 +14,8 @@ import { AlumnoDatosAcademicosModule } from './infrastructure/modules/alumnos_da
 import { JwtMiddleware } from './infrastructure/security/auth/jwt.middleware';
 
 import { SsOrganizacionesModule } from './infrastructure/modules/servicio_social/ss_organizaciones.module';
+import { SsTiposProgramasModule } from './infrastructure/modules/servicio_social/ss_tipos_programas.module';
+import { SsProgramasModule } from './infrastructure/modules/servicio_social/ss_programas.module';
 
 @Module({
   imports: [
@@ -32,7 +34,9 @@ import { SsOrganizacionesModule } from './infrastructure/modules/servicio_social
     // Módulo de autenticación
     AuthModule,
 
-    SsOrganizacionesModule
+    SsOrganizacionesModule,
+    SsTiposProgramasModule,
+    SsProgramasModule
   ],
 
   controllers: [

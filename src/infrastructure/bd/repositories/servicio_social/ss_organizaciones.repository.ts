@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { SsOrganizacionesEntity } from '../../entities/servicio_social/ss_organizaciones.entity';
 import { SsOrganizaciones } from '../../../../dtos/POCOS/servicio_social/ss_organizaciones.poco';
-import { ISsOrganizacionesRepository } from '../../../../domain/interfaces/servicio_social/ss_organizaciones.repository';
+import { ISsOrganizacionesRepository } from '../../../../domain/interfaces/servicio_social/ss_organizaciones';
 
 @Injectable()
 export class SsOrganizacionesRepository implements ISsOrganizacionesRepository {

@@ -1,6 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
-import { ObtenerSsOrganizaciones } from '../../logic/servicio_Social/obtener_ss_organizaciones';
+import { ObtenerSsOrganizaciones } from '../../logic/servicio_Social/Organizaciones/obtener_ss_organizaciones';
 
 @UseGuards(JwtGuard)
 @Controller('servicio-social/organizaciones')
