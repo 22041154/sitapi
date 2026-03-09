@@ -1,22 +1,53 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
-import { ObtenerSsSeguimientoAlumnosUseCase } from '../../logic/servicio_Social/SeguimientoAlumnos/obtener_ss_seguimiento_alumnos';
-import { SsSeguimientoAlumnosResponse } from '../../../dtos/responses/servicio_social/ss_seguimiento_alumnos.response';
+import { ObtenerSsSeguimientoAlumnos } from '../../logic/servicio_Social/SeguimientoAlumnos/obtener_ss_seguimiento_alumnos';
 
 @ApiTags('Servicio Social - Seguimiento Alumnos')
-@Controller('servicio-social/seguimiento-alumnos')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtGuard)
-@ApiBearerAuth()
+@Controller('servicio-social/seguimiento-alumnos')
 export class SsSeguimientoAlumnosController {
   constructor(
-    private readonly obtenerSsSeguimientoAlumnosUseCase: ObtenerSsSeguimientoAlumnosUseCase,
+    private readonly obtenerSsSeguimientoAlumnosUseCase: ObtenerSsSeguimientoAlumnos,
   ) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los seguimientos de alumnos' })
-  @ApiResponse({ status: 200, description: 'Lista de seguimientos obtenida exitosamente', type: [SsSeguimientoAlumnosResponse] })
-  async obtenerTodos(): Promise<SsSeguimientoAlumnosResponse[]> {
-    return await this.obtenerSsSeguimientoAlumnosUseCase.execute();
+  @ApiResponse({ status: 200, description: 'Lista obtenida correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'No se encontraron seguimientos' })
+  async ObtenerTodos() {
+    return this.obtenerSsSeguimientoAlumnosUseCase.ObtenerTodos();
+  }
+
+  @Get('id/:id')
+  @ApiOperation({ summary: 'Obtener seguimiento por id' })
+  @ApiParam({ name: 'id', type: Number, description: 'Id del seguimiento' })
+  @ApiResponse({ status: 200, description: 'Seguimiento encontrado correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Seguimiento no encontrado' })
+  async ObtenerPorId(@Param('id', ParseIntPipe) id: number) {
+    return this.obtenerSsSeguimientoAlumnosUseCase.ObtenerPorId(id);
+  }
+
+  @Get('alumno/:id_alumno')
+  @ApiOperation({ summary: 'Obtener seguimientos por ID de alumno académico' })
+  @ApiParam({ name: 'id_alumno', type: Number, description: 'ID del alumno académico' })
+  @ApiResponse({ status: 200, description: 'Seguimientos encontrados correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'No se encontraron seguimientos para el alumno' })
+  async ObtenerPorIdAlumnoAcademico(@Param('id_alumno', ParseIntPipe) id_alumno: number) {
+    return this.obtenerSsSeguimientoAlumnosUseCase.ObtenerPorIdAlumnoAcademico(id_alumno);
+  }
+
+  @Get('programa/:id_programa')
+  @ApiOperation({ summary: 'Obtener seguimientos por ID de programa' })
+  @ApiParam({ name: 'id_programa', type: Number, description: 'ID del programa' })
+  @ApiResponse({ status: 200, description: 'Seguimientos encontrados correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'No se encontraron seguimientos para el programa' })
+  async ObtenerPorIdPrograma(@Param('id_programa', ParseIntPipe) id_programa: number) {
+    return this.obtenerSsSeguimientoAlumnosUseCase.ObtenerPorIdPrograma(id_programa);
   }
 }

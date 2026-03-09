@@ -12,15 +12,32 @@ export class SsSeguimientoAlumnosRepository implements ISsSeguimientoAlumnosRepo
     private readonly seguimientoAlumnosRepository: Repository<SsSeguimientoAlumnosEntity>,
   ) {}
 
-  async obtenerTodos(): Promise<SsSeguimientoAlumnosPoco[]> {
+  private mapToPoco(entidad: SsSeguimientoAlumnosEntity): SsSeguimientoAlumnosPoco {
+    const poco = new SsSeguimientoAlumnosPoco();
+    poco.id = Number(entidad.id);
+    poco.id_alumno_academico = Number(entidad.id_alumno_academico);
+    poco.id_programa = Number(entidad.id_programa);
+    poco.id_periodo_escolar = Number(entidad.id_periodo_escolar);
+    return poco;
+  }
+
+  async ObtenerTodos(): Promise<SsSeguimientoAlumnosPoco[]> {
     const entidades = await this.seguimientoAlumnosRepository.find();
-    return entidades.map((entidad) => {
-      const poco = new SsSeguimientoAlumnosPoco();
-      poco.id = Number(entidad.id);
-      poco.id_alumno_academico = Number(entidad.id_alumno_academico);
-      poco.id_programa = Number(entidad.id_programa);
-      poco.id_periodo_escolar = Number(entidad.id_periodo_escolar);
-      return poco;
-    });
+    return entidades.map(this.mapToPoco);
+  }
+
+  async ObtenerPorId(id: number): Promise<SsSeguimientoAlumnosPoco | null> {
+    const entidad = await this.seguimientoAlumnosRepository.findOne({ where: { id } });
+    return entidad ? this.mapToPoco(entidad) : null;
+  }
+
+  async ObtenerPorIdAlumnoAcademico(id_alumno_academico: number): Promise<SsSeguimientoAlumnosPoco[]> {
+    const entidades = await this.seguimientoAlumnosRepository.find({ where: { id_alumno_academico } });
+    return entidades.map(this.mapToPoco);
+  }
+
+  async ObtenerPorIdPrograma(id_programa: number): Promise<SsSeguimientoAlumnosPoco[]> {
+    const entidades = await this.seguimientoAlumnosRepository.find({ where: { id_programa } });
+    return entidades.map(this.mapToPoco);
   }
 }
