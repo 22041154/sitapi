@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
+//
 @Entity('alumnos_datos_academicos', { schema: 'alumnos' })
 export class AlumnoDatosAcademicosEntity {
 

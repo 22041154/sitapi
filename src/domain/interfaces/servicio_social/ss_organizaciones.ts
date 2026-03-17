@@ -1,6 +1,6 @@
 import { SsOrganizaciones } from "../../../dtos/POCOS/servicio_social/ss_organizaciones.poco";
 import { CrearSsOrganizacionDto } from "../../../dtos/requests/Servicio Social/Organizaciones/Crear_Organoiazciones_DTO";
-
+//
 export interface ISsOrganizacionesRepository {
 
   ObtenerTodos(): Promise<SsOrganizaciones[]>;

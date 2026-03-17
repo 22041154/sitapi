@@ -4,3 +4,4 @@ export class SsPermisos {
     public readonly permiso?: string,
   ) {}
 }
+//
