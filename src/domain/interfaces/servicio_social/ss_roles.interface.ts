@@ -1,4 +1,5 @@
 import { SsRoles } from "../../../dtos/POCOS/servicio_social/ss_roles.poco";
+import { CrearSsRolesDto } from "../../../dtos/requests/Servicio Social/Roles/crear_ss_roles.dto";
 
 export interface ISsRolesRepository {
 
@@ -8,4 +9,5 @@ export interface ISsRolesRepository {
 
   ObtenerPorNombreRol(rol: string): Promise<SsRoles[]>;
 
+  Crear(dto: CrearSsRolesDto): Promise<SsRoles>;
 }

@@ -1,7 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsRoles } from '../../logic/servicio_Social/Roles/obtener_ss_roles';
+import { CrearSsRolesUseCase } from '../../logic/servicio_Social/Roles/crear_ss_roles';
+import { CrearSsRolesDto } from '../../../dtos/requests/Servicio Social/Roles/crear_ss_roles.dto';
 
 @ApiTags('Servicio Social - Roles')
 @ApiBearerAuth('access-token')
@@ -11,6 +13,7 @@ export class SsRolesController {
 
   constructor(
     private readonly obtenerSsRolesUseCase: ObtenerSsRoles,
+    private readonly crearSsRolesUseCase: CrearSsRolesUseCase,
   ) {}
 
   @Get()
@@ -45,5 +48,17 @@ export class SsRolesController {
   ) {
     return this.obtenerSsRolesUseCase.ObtenerPorNombreRol(rol);
   }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un nuevo rol' })
+  @ApiBody({ type: CrearSsRolesDto })
+  @ApiResponse({ status: 201, description: 'Rol creado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 409, description: 'Ya existe un rol con ese nombre' })
+  async Crear(@Body() dto: CrearSsRolesDto) {
+    return this.crearSsRolesUseCase.Ejecutar(dto);
+  }
+  
 
 }

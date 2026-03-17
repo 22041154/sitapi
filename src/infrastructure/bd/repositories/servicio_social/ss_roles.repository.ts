@@ -4,6 +4,8 @@ import { ILike, Repository } from 'typeorm';
 import { SsRolesEntity } from '../../entities/servicio_social/ss_roles..entity';
 import { SsRoles } from '../../../../dtos/POCOS/servicio_social/ss_roles.poco';
 import { ISsRolesRepository } from '../../../../domain/interfaces/servicio_social/ss_roles.interface';
+import { CrearSsRolesDto } from '../../../../dtos/requests/Servicio Social/Roles/crear_ss_roles.dto';
+
 
 @Injectable()
 export class SsRolesRepository implements ISsRolesRepository {
@@ -39,6 +41,15 @@ export class SsRolesRepository implements ISsRolesRepository {
     });
 
     return entities.map(entity => this.MapearEntidadADominio(entity));
+  }
+  
+  async Crear(dto: CrearSsRolesDto): Promise<SsRoles> {
+    const entity = this.ssRolesRepository.create({
+      rol: dto.rol,
+    });
+
+    const entityGuardada = await this.ssRolesRepository.save(entity);
+    return this.MapearEntidadADominio(entityGuardada);
   }
 
 }

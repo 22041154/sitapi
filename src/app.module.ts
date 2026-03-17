@@ -19,6 +19,8 @@ import { SsProgramasModule } from './infrastructure/modules/servicio_social/ss_p
 import { SsRolesModule } from './infrastructure/modules/servicio_social/ss_roles.moduke';
 import { SsPermisosModule } from './infrastructure/modules/servicio_social/ss_permisos.module';
 import { SsSeguimientoAlumnosModule } from './infrastructure/modules/servicio_social/ss_seguimiento_alumnos.module';
+import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_social/ss_documentos_alumnos.module';
+import { SsRolesPermisosModule } from './infrastructure/modules/servicio_social/ss_roles_permisos.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { SsSeguimientoAlumnosModule } from './infrastructure/modules/servicio_so
     SsRolesModule,
     SsPermisosModule,
     SsSeguimientoAlumnosModule,
+    SsDocumentosAlumnosModule,
+    SsRolesPermisosModule,
   ],
 
   controllers: [
