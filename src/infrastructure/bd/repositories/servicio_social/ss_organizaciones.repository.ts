@@ -4,6 +4,7 @@ import { ILike, Repository } from 'typeorm';
 import { SsOrganizacionesEntity } from '../../entities/servicio_social/ss_organizaciones.entity';
 import { SsOrganizaciones } from '../../../../dtos/POCOS/servicio_social/ss_organizaciones.poco';
 import { ISsOrganizacionesRepository } from '../../../../domain/interfaces/servicio_social/ss_organizaciones';
+import { CrearSsOrganizacionDto } from '../../../../dtos/requests/Servicio Social/Organizaciones/Crear_Organoiazciones_DTO';
 
 @Injectable()
 export class SsOrganizacionesRepository implements ISsOrganizacionesRepository {
@@ -49,6 +50,18 @@ export class SsOrganizacionesRepository implements ISsOrganizacionesRepository {
     });
 
     return entities.map(entity => this.MapearEntidadADominio(entity));
+  }
+
+  async Crear(dto: CrearSsOrganizacionDto): Promise<SsOrganizaciones> {
+    const entity = this.ssOrganizacionesRepository.create({
+      nombre_organizacion: dto.nombre_organizacion,
+      nombre_titular_organizacion: dto.nombre_titular_organizacion,
+      puesto_titular_organizaciones: dto.puesto_titular_organizaciones,
+    });
+
+    const entityGuardada = await this.ssOrganizacionesRepository.save(entity);
+
+    return this.MapearEntidadADominio(entityGuardada);
   }
 
 }

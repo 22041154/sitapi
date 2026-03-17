@@ -4,6 +4,7 @@ import { SsOrganizacionesEntity } from '../../bd/entities/servicio_social/ss_org
 import { SsOrganizacionesRepository } from '../../bd/repositories/servicio_social/ss_organizaciones.repository';
 import { SsOrganizacionesController } from '../../../application/controllers/servicio_social/ss_organizaaciones.controller';
 import { ObtenerSsOrganizaciones } from '../../../application/logic/servicio_Social/Organizaciones/obtener_ss_organizaciones';
+import { CrearSsOrganizacionUseCase } from '../../../application/logic/servicio_Social/Organizaciones/crear_ss_organizaciones';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ObtenerSsOrganizaciones } from '../../../application/logic/servicio_Soc
 
   providers: [
     ObtenerSsOrganizaciones,
+    CrearSsOrganizacionUseCase,
     {
       provide: 'ISsOrganizacionesRepository',
       useClass: SsOrganizacionesRepository,
@@ -24,6 +26,7 @@ import { ObtenerSsOrganizaciones } from '../../../application/logic/servicio_Soc
 
   exports: [
     ObtenerSsOrganizaciones,
+    CrearSsOrganizacionUseCase,
   ],
 })
 export class SsOrganizacionesModule {}
