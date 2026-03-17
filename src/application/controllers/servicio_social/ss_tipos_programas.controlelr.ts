@@ -1,7 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsTiposProgramas } from '../../logic/servicio_Social/Tipos_Programas/obtener_ss_tipos_programas';
+import { CrearSsTipoProgramaUseCase } from '../../logic/servicio_Social/Tipos_Programas/crear_ss_tipos_programas';
+import { CrearSsTipoProgramaDto } from '../../../dtos/requests/Servicio Social/Tipos_Programas/crear_ss_tipos_programas';
 
 @ApiTags('Servicio Social - Tipos de Programas')
 @ApiBearerAuth('access-token')
@@ -11,6 +13,7 @@ export class SsTiposProgramasController {
 
   constructor(
     private readonly obtenerSsTiposProgramasUseCase: ObtenerSsTiposProgramas,
+    private readonly crearSsTipoProgramaUseCase: CrearSsTipoProgramaUseCase,
   ) {}
 
   @Get()
@@ -44,6 +47,20 @@ export class SsTiposProgramasController {
     @Param('nombreTipo') nombreTipo: string
   ) {
     return this.obtenerSsTiposProgramasUseCase.ObtenerPorNombreTipo(nombreTipo);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un nuevo tipo de programa' })
+  @ApiBody({ type: CrearSsTipoProgramaDto })
+  @ApiResponse({ status: 201, description: 'Tipo de programa creado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 409, description: 'Ya existe un tipo de programa con ese nombre' })
+  async Crear(
+    @Body() dto: CrearSsTipoProgramaDto
+  ) {
+    return this.crearSsTipoProgramaUseCase.Ejecutar(dto);
   }
 
 }

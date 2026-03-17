@@ -1,7 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsOrganizaciones } from '../../logic/servicio_Social/Organizaciones/obtener_ss_organizaciones';
+import { CrearSsOrganizacionUseCase } from '../../logic/servicio_Social/Organizaciones/crear_ss_organizaciones';
+import { CrearSsOrganizacionDto } from '../../../dtos/requests/Servicio Social/Organizaciones/Crear_Organoiazciones_DTO';
 
 @ApiTags('Servicio Social - Organizaciones')
 @ApiBearerAuth('access-token')
@@ -11,6 +13,7 @@ export class SsOrganizacionesController {
 
   constructor(
     private readonly obtenerSsOrganizacionesUseCase: ObtenerSsOrganizaciones,
+    private readonly crearSsOrganizacionUseCase: CrearSsOrganizacionUseCase,
   ) {}
 
   @Get()
@@ -56,6 +59,20 @@ export class SsOrganizacionesController {
     @Param('nombreTitular') nombreTitular: string
   ) {
     return this.obtenerSsOrganizacionesUseCase.ObtenerPorNombreTitular(nombreTitular);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear una nueva organización' })
+  @ApiBody({ type: CrearSsOrganizacionDto })
+  @ApiResponse({ status: 201, description: 'Organización creada correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 409, description: 'Ya existe una organización con ese nombre' })
+  async Crear(
+    @Body() dto: CrearSsOrganizacionDto
+  ) {
+    return this.crearSsOrganizacionUseCase.Ejecutar(dto);
   }
 
 }

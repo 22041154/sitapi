@@ -4,6 +4,7 @@ import { ILike, Repository } from 'typeorm';
 import { SsTiposProgramasEntity } from '../../entities/servicio_social/ss_tipos_programas.entity';
 import { SsTiposProgramas } from '../../../../dtos/POCOS/servicio_social/ss_tipos_programas.poco';
 import { ISsTiposProgramasRepository } from '../../../../domain/interfaces/servicio_social/ss_tipos_programas.interface';
+import { CrearSsTipoProgramaDto } from '../../../../dtos/requests/Servicio Social/Tipos_Programas/crear_ss_tipos_programas';
 
 @Injectable()
 export class SsTiposProgramasRepository implements ISsTiposProgramasRepository {
@@ -15,7 +16,7 @@ export class SsTiposProgramasRepository implements ISsTiposProgramasRepository {
 
   private MapearEntidadADominio(entity: SsTiposProgramasEntity): SsTiposProgramas {
     return new SsTiposProgramas(
-      entity.id,
+      Number(entity.id),
       entity.nombre_tipo,
     );
   }
@@ -39,6 +40,16 @@ export class SsTiposProgramasRepository implements ISsTiposProgramasRepository {
     });
 
     return entities.map(entity => this.MapearEntidadADominio(entity));
+  }
+
+  async Crear(dto: CrearSsTipoProgramaDto): Promise<SsTiposProgramas> {
+    const entity = this.ssTiposProgramasRepository.create({
+      nombre_tipo: dto.nombre_tipo,
+    });
+
+    const entityGuardada = await this.ssTiposProgramasRepository.save(entity);
+
+    return this.MapearEntidadADominio(entityGuardada);
   }
 
 }
