@@ -5,6 +5,7 @@ import { ObtenerSsRoles } from '../../logic/servicio_Social/Roles/obtener_ss_rol
 import { CrearSsRolesUseCase } from '../../logic/servicio_Social/Roles/crear_ss_roles';
 import { CrearSsRolesDto } from '../../../dtos/requests/Servicio Social/Roles/crear_ss_roles.dto';
 
+
 @ApiTags('Servicio Social - Roles')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtGuard)
