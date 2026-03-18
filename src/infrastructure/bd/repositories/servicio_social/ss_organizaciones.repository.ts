@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { SsOrganizacionesEntity } from '../../entities/servicio_social/ss_organizaciones.entity';
@@ -62,6 +62,32 @@ export class SsOrganizacionesRepository implements ISsOrganizacionesRepository {
     const entityGuardada = await this.ssOrganizacionesRepository.save(entity);
 
     return this.MapearEntidadADominio(entityGuardada);
+  }
+
+  async Eliminar(id: number): Promise<void> {
+    const entity = await this.ssOrganizacionesRepository.findOne({
+      where: { id }
+    });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró la organización con id ${id}`);
+    }
+
+    await this.ssOrganizacionesRepository.delete(id);
+  }
+
+  async EliminarPorNombre(nombre: string): Promise<void> {
+    const entities = await this.ssOrganizacionesRepository.find({
+      where: { nombre_organizacion: ILike(`%${nombre}%`) }
+    });
+
+    if (!entities || entities.length === 0) {
+      throw new NotFoundException(`No se encontró ninguna organización con el nombre ${nombre}`);
+    }
+
+    await this.ssOrganizacionesRepository.delete(
+      entities.map(entity => entity.id)
+    );
   }
 
 }

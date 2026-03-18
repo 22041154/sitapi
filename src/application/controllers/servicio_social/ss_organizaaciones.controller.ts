@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsOrganizaciones } from '../../logic/servicio_Social/Organizaciones/obtener_ss_organizaciones';
 import { CrearSsOrganizacionUseCase } from '../../logic/servicio_Social/Organizaciones/crear_ss_organizaciones';
+import { EliminarSsOrganizacionUseCase } from '../../logic/servicio_Social/Organizaciones/eliminar_ss_organizaciones';
 import { CrearSsOrganizacionDto } from '../../../dtos/requests/Servicio Social/Organizaciones/Crear_Organoiazciones_DTO';
 
 @ApiTags('Servicio Social - Organizaciones')
@@ -14,6 +15,7 @@ export class SsOrganizacionesController {
   constructor(
     private readonly obtenerSsOrganizacionesUseCase: ObtenerSsOrganizaciones,
     private readonly crearSsOrganizacionUseCase: CrearSsOrganizacionUseCase,
+    private readonly eliminarSsOrganizacionUseCase: EliminarSsOrganizacionUseCase,
   ) {}
 
   @Get()
@@ -73,6 +75,32 @@ export class SsOrganizacionesController {
     @Body() dto: CrearSsOrganizacionDto
   ) {
     return this.crearSsOrganizacionUseCase.Ejecutar(dto);
+  }
+
+  @Delete('id/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar organización por id' })
+  @ApiParam({ name: 'id', type: Number, description: 'Id de la organización a eliminar' })
+  @ApiResponse({ status: 204, description: 'Organización eliminada correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Organización no encontrada' })
+  async EliminarPorId(
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    await this.eliminarSsOrganizacionUseCase.EliminarPorId(id);
+  }
+
+  @Delete('nombre/:nombre')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar organizaciones por nombre' })
+  @ApiParam({ name: 'nombre', type: String, description: 'Nombre de la organización a eliminar' })
+  @ApiResponse({ status: 204, description: 'Organización eliminada correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'No se encontró ninguna organización con ese nombre' })
+  async EliminarPorNombre(
+    @Param('nombre') nombre: string
+  ) {
+    await this.eliminarSsOrganizacionUseCase.EliminarPorNombre(nombre);
   }
 
 }
