@@ -6,6 +6,7 @@ import { SsTiposProgramasEntity } from '../../bd/entities/servicio_social/ss_tip
 import { SsProgramasRepository } from '../../bd/repositories/servicio_social/ss_programas.repository';
 import { SsProgramasController } from '../../../application/controllers/servicio_social/ss_programas.controller';
 import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/Programas/obtemer_ss_programas';
+import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/crear_ss_programas';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/P
 
   providers: [
     ObtenerSsProgramas,
+    CrearSsProgramaUseCase,
     {
       provide: 'ISsProgramasRepository',
       useClass: SsProgramasRepository,
@@ -30,6 +32,7 @@ import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/P
 
   exports: [
     ObtenerSsProgramas,
+    CrearSsProgramaUseCase,
   ],
 })
 export class SsProgramasModule {}

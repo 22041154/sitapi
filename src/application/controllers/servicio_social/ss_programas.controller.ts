@@ -1,7 +1,10 @@
-import { Controller, Get, Param, ParseIntPipe, ParseBoolPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsProgramas } from '../../logic/servicio_Social/Programas/obtemer_ss_programas';
+import { CrearSsProgramaUseCase } from '../../logic/servicio_Social/Programas/crear_ss_programas';
+import { CrearSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 
 @ApiTags('Servicio Social - Programas')
 @ApiBearerAuth('access-token')
@@ -11,6 +14,7 @@ export class SsProgramasController {
 
   constructor(
     private readonly obtenerSsProgramasUseCase: ObtenerSsProgramas,
+    private readonly crearSsProgramaUseCase: CrearSsProgramaUseCase,
   ) {}
 
   @Get()
@@ -89,6 +93,23 @@ export class SsProgramasController {
     @Param('modalidad', ParseBoolPipe) modalidad: boolean
   ) {
     return this.obtenerSsProgramasUseCase.ObtenerPorModalidad(modalidad);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('plan_trabajo'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Crear un nuevo programa' })
+  @ApiResponse({ status: 201, description: 'Programa creado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 409, description: 'Ya existe un programa con ese nombre' })
+  async Crear(
+    @Body() dto: CrearSsProgramaDto,
+    @UploadedFile() file?: any,
+  ) {
+    const planTrabajo = file ? file.buffer : undefined;
+    return this.crearSsProgramaUseCase.Ejecutar(dto, planTrabajo);
   }
 
 }

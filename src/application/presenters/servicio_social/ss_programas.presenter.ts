@@ -1,5 +1,5 @@
-import { SsProgramas } from "../../../dtos/POCOS/servicio_social/ss_programas.poco";
-import { SsProgramasResponse } from "../../../dtos/responses/servicio_social/ss_programas.respinse";
+import { SsProgramas } from '../../../dtos/POCOS/servicio_social/ss_programas.poco';
+import { SsProgramasResponse } from '../../../dtos/responses/servicio_social/ss_programas.respinse';
 
 export class SsProgramasPresenter {
 
@@ -16,7 +16,10 @@ export class SsProgramasPresenter {
     response.esModalidadInterna = poco.EsModalidadInterna;
     response.fechaInicioServicio = poco.fechaInicioServicio;
     response.fechaFinServicio = poco.fechaFinServicio;
-    response.planTrabajo = poco.planTrabajo;
+    response.planTrabajo = poco.planTrabajo
+      ? Buffer.from(poco.planTrabajo).toString('base64')
+      : null;
+
     return response;
   }
 

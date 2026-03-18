@@ -10,5 +10,5 @@ export class SsProgramasResponse {
   esModalidadInterna?: boolean;
   fechaInicioServicio?: Date;
   fechaFinServicio?: Date;
-  planTrabajo?: Buffer;
+  planTrabajo?: string;
 }

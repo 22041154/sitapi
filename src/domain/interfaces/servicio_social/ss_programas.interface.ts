@@ -1,4 +1,5 @@
 import { SsProgramas } from "../../../dtos/POCOS/servicio_social/ss_programas.poco";
+import { CrearSsProgramaDto } from "../../../dtos/requests/Servicio Social/Programas/crear_ss_programas";
 
 export interface ISsProgramasRepository {
 
@@ -16,4 +17,5 @@ export interface ISsProgramasRepository {
 
   ObtenerVigentes(): Promise<SsProgramas[]>;
 
+  Crear(dto: CrearSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas>;
 }

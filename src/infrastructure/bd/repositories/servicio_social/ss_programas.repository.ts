@@ -6,6 +6,7 @@ import { SsOrganizacionesEntity } from '../../entities/servicio_social/ss_organi
 import { SsTiposProgramasEntity } from '../../entities/servicio_social/ss_tipos_programas.entity';
 import { SsProgramas } from '../../../../dtos/POCOS/servicio_social/ss_programas.poco';
 import { ISsProgramasRepository } from '../../../../domain/interfaces/servicio_social/ss_programas.interface';
+import { CrearSsProgramaDto } from '../../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 
 @Injectable()
 export class SsProgramasRepository implements ISsProgramasRepository {
@@ -17,10 +18,10 @@ export class SsProgramasRepository implements ISsProgramasRepository {
 
   private MapearEntidadADominio(row: any): SsProgramas {
     return new SsProgramas(
-      row.id,
-      row.id_organizacion,
+      Number(row.id),
+      Number(row.id_organizacion),
       row.nombre_organizacion,
-      row.id_tipo_programa,
+      Number(row.id_tipo_programa),
       row.nombre_tipo,
       row.nombre_programa,
       row.lista_actividades,
@@ -111,6 +112,23 @@ export class SsProgramasRepository implements ISsProgramasRepository {
       .getRawMany();
 
     return results.map(row => this.MapearEntidadADominio(row));
+  }
+
+  async Crear(dto: CrearSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas> {
+    const entity = this.ssProgramasRepository.create({
+      id_organizacion: dto.id_organizacion,
+      id_tipo_programa: dto.id_tipo_programa,
+      nombre_programa: dto.nombre_programa,
+      modalidad: dto.modalidad,
+      fecha_inicio_servicio: dto.fecha_inicio_servicio ? new Date(dto.fecha_inicio_servicio) : null,
+      fecha_fin_servicio: dto.fecha_fin_servicio ? new Date(dto.fecha_fin_servicio) : null,
+      lista_actividades: dto.lista_actividades,
+      plan_trabajo: planTrabajo ?? null,
+    });
+
+    const entityGuardada = await this.ssProgramasRepository.save(entity);
+
+    return this.ObtenerPorId(Number(entityGuardada.id));
   }
 
 }
