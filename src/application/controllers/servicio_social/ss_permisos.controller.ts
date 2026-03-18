@@ -1,7 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsPermisos } from '../../logic/servicio_Social/Permisos/obtener_ss_permisos';
+import { CrearSsPermisosDto } from '../../../dtos/requests/Servicio Social/Permisos/crear_ss_permisos.dto';
+import { CrearSsPermisosUseCase } from '../../logic/servicio_Social/Permisos/crear_ss_permisos';
 
 @ApiTags('Servicio Social - Permisos')
 @ApiBearerAuth('access-token')
@@ -11,6 +13,7 @@ export class SsPermisosController {
 
   constructor(
     private readonly obtenerSsPermisosUseCase: ObtenerSsPermisos,
+    private readonly crearSsPermisosUseCase: CrearSsPermisosUseCase,
   ) {}
 
   @Get()
@@ -44,6 +47,14 @@ export class SsPermisosController {
     @Param('permiso') permiso: string
   ) {
     return this.obtenerSsPermisosUseCase.ObtenerPorNombrePermiso(permiso);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un nuevo permiso' })
+  @ApiBody({ type: CrearSsPermisosDto })
+  async Crear(@Body() dto: CrearSsPermisosDto) {
+    return this.crearSsPermisosUseCase.Ejecutar(dto);
   }
 
 }

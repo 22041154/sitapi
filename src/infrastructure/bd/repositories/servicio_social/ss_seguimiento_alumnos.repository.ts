@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ISsSeguimientoAlumnosRepository } from '../../../../domain/interfaces/servicio_social/ss_seguimiento_alumnos.interface';
 import { SsSeguimientoAlumnosEntity } from '../../entities/servicio_social/ss_seguimiento_alumnos.entity';
 import { SsSeguimientoAlumnosPoco } from '../../../../dtos/POCOS/servicio_social/ss_seguimiento_alumnos.poco';
+import { CrearSsSeguimientoAlumnosDto } from '../../../../dtos/requests/Servicio Social/SeguimientoAlumnos/crear_ss_seguimiento_alumnos.dto';
 
 @Injectable()
 export class SsSeguimientoAlumnosRepository implements ISsSeguimientoAlumnosRepository {
@@ -39,5 +40,15 @@ export class SsSeguimientoAlumnosRepository implements ISsSeguimientoAlumnosRepo
   async ObtenerPorIdPrograma(id_programa: number): Promise<SsSeguimientoAlumnosPoco[]> {
     const entidades = await this.seguimientoAlumnosRepository.find({ where: { id_programa } });
     return entidades.map(this.mapToPoco);
+  }
+  async Crear(dto: CrearSsSeguimientoAlumnosDto): Promise<SsSeguimientoAlumnosPoco> {
+    const entity = this.seguimientoAlumnosRepository.create({
+      id_alumno_academico: dto.id_alumno_academico,
+      id_programa: dto.id_programa,
+      id_periodo_escolar: dto.id_periodo_escolar,
+    });
+    
+    const entityGuardada = await this.seguimientoAlumnosRepository.save(entity);
+    return this.mapToPoco(entityGuardada); // Reutilizamos tu función privada de mapeo
   }
 }

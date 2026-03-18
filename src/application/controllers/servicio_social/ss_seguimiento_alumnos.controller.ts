@@ -1,7 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsSeguimientoAlumnos } from '../../logic/servicio_Social/SeguimientoAlumnos/obtener_ss_seguimiento_alumnos';
+import { CrearSsSeguimientoAlumnosDto } from '../../../dtos/requests/Servicio Social/SeguimientoAlumnos/crear_ss_seguimiento_alumnos.dto';
+import { CrearSsSeguimientoAlumnosUseCase } from '../../logic/servicio_Social/SeguimientoAlumnos/crear_ss_seguimiento_alumnos';
 
 @ApiTags('Servicio Social - Seguimiento Alumnos')
 @ApiBearerAuth('access-token')
@@ -10,6 +12,7 @@ import { ObtenerSsSeguimientoAlumnos } from '../../logic/servicio_Social/Seguimi
 export class SsSeguimientoAlumnosController {
   constructor(
     private readonly obtenerSsSeguimientoAlumnosUseCase: ObtenerSsSeguimientoAlumnos,
+    private readonly crearSsSeguimientoAlumnosUseCase: CrearSsSeguimientoAlumnosUseCase,
   ) {}
 
   @Get()
@@ -49,5 +52,13 @@ export class SsSeguimientoAlumnosController {
   @ApiResponse({ status: 404, description: 'No se encontraron seguimientos para el programa' })
   async ObtenerPorIdPrograma(@Param('id_programa', ParseIntPipe) id_programa: number) {
     return this.obtenerSsSeguimientoAlumnosUseCase.ObtenerPorIdPrograma(id_programa);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un nuevo seguimiento de alumno' })
+  @ApiBody({ type: CrearSsSeguimientoAlumnosDto })
+  async Crear(@Body() dto: CrearSsSeguimientoAlumnosDto) {
+    return this.crearSsSeguimientoAlumnosUseCase.Ejecutar(dto);
   }
 }

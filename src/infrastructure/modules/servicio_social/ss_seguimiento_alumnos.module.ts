@@ -4,6 +4,7 @@ import { SsSeguimientoAlumnosEntity } from '../../bd/entities/servicio_social/ss
 import { SsSeguimientoAlumnosController } from '../../../application/controllers/servicio_social/ss_seguimiento_alumnos.controller';
 import { ObtenerSsSeguimientoAlumnos } from '../../../application/logic/servicio_Social/SeguimientoAlumnos/obtener_ss_seguimiento_alumnos';
 import { SsSeguimientoAlumnosRepository } from '../../bd/repositories/servicio_social/ss_seguimiento_alumnos.repository';
+import { CrearSsSeguimientoAlumnosUseCase } from '../../../application/logic/servicio_Social/SeguimientoAlumnos/crear_ss_seguimiento_alumnos';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SsSeguimientoAlumnosEntity])],
@@ -12,6 +13,7 @@ import { SsSeguimientoAlumnosRepository } from '../../bd/repositories/servicio_s
 
   providers: [
   ObtenerSsSeguimientoAlumnos,
+  CrearSsSeguimientoAlumnosUseCase,
   {
     provide: 'ISsSeguimientoAlumnosRepository', 
     useClass: SsSeguimientoAlumnosRepository,

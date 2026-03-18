@@ -4,6 +4,7 @@ import { SsPermisosEntity } from '../../bd/entities/servicio_social/ss_permisos.
 import { SsPermisosRepository } from '../../bd/repositories/servicio_social/ss_permisos.repository';
 import { SsPermisosController } from '../../../application/controllers/servicio_social/ss_permisos.controller';
 import { ObtenerSsPermisos } from '../../../application/logic/servicio_Social/Permisos/obtener_ss_permisos';
+import { CrearSsPermisosUseCase } from '../../../application/logic/servicio_Social/Permisos/crear_ss_permisos';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ObtenerSsPermisos } from '../../../application/logic/servicio_Social/Pe
 
   providers: [
     ObtenerSsPermisos,
+    CrearSsPermisosUseCase,
     {
       provide: 'ISsPermisosRepository',
       useClass: SsPermisosRepository,
