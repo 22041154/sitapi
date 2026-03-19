@@ -21,7 +21,7 @@ import { SsRolesModule } from './infrastructure/modules/servicio_social/ss_roles
 import { SsPermisosModule } from './infrastructure/modules/servicio_social/ss_permisos.module';
 import { SsSeguimientoAlumnosModule } from './infrastructure/modules/servicio_social/ss_seguimiento_alumnos.module';
 import { SsRolesPermisosModule } from './infrastructure/modules/servicio_social/ss_roles_permisos.module';
-
+import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_social/ss_documentos_alumnos.module';
 @Module({
   imports: [
     // Configuración global de variables de entorno
@@ -45,7 +45,8 @@ import { SsRolesPermisosModule } from './infrastructure/modules/servicio_social/
     SsRolesModule,
     SsPermisosModule,
     SsSeguimientoAlumnosModule,
-    SsRolesPermisosModule
+    SsRolesPermisosModule,
+    SsDocumentosAlumnosModule,
   ],
 
   controllers: [

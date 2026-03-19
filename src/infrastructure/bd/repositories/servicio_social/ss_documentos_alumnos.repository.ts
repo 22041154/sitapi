@@ -40,6 +40,11 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
     const entidades = await this.documentosRepository.find({ where: { id_alumno_academico } });
     return entidades.map(e => this.mapToPoco(e));
   }
+  
+  async ObtenerPorIdPlanTrabajo(id_plan_trabajo: number): Promise<SsDocumentosAlumnosPoco[]> {
+    const entidades = await this.documentosRepository.find({ where: { id_plan_trabajo } });
+    return entidades.map(e => this.mapToPoco(e));
+  }
 
   async Crear(dto: CrearSsDocumentosAlumnosDto, archivos: any): Promise<SsDocumentosAlumnosPoco> {
     const entity = this.documentosRepository.create({

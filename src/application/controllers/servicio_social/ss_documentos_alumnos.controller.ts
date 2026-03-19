@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, HttpCode, HttpStatus, Res } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsDocumentosAlumnos } from '../../logic/servicio_Social/DocumentosAlumnos/obtener_ss_documentos_alumnos';
 import { CrearSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/DocumentosAlumnos/crear_ss_documentos_alumnos';
 import { CrearSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
+import { Response } from 'express';
 
 @ApiTags('Servicio Social - Documentos Alumnos')
 @ApiBearerAuth('access-token')
@@ -37,8 +38,92 @@ export class SsDocumentosAlumnosController {
     return this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorIdAlumnoAcademico(id_alumno);
   }
 
+  @Get('plan-trabajo/:id_plan_trabajo')
+  @ApiOperation({ summary: 'Obtener documentos por ID de plan de trabajo' })
+  @ApiParam({ name: 'id_plan_trabajo', type: Number, description: 'ID del plan de trabajo' })
+  async ObtenerPorIdPlanTrabajo(@Param('id_plan_trabajo', ParseIntPipe) id_plan_trabajo: number) {
+    return this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorIdPlanTrabajo(id_plan_trabajo);
+  }
 
-  // --- NUEVO MÉTODO POST ---
+  @Get('ver-carta-presentacion/:id')
+  @ApiOperation({ summary: 'Ver el PDF de la carta de presentación' })
+  async VerCartaPresentacion(
+    @Param('id', ParseIntPipe) id: number, 
+    @Res() res: Response
+  ) {
+    const registro = await this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorId(id);
+    
+    if (!registro || !registro.carta_presentacion) {
+      return res.status(404).send('No se encontró el documento o no se ha subido la carta');
+    }
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="carta_presentacion.pdf"',
+    });
+
+    res.send(registro.carta_presentacion);
+  }
+  @Get('ver-carta-compromiso/:id')
+  @ApiOperation({ summary: 'Ver el PDF de la carta compromiso' })
+  async VerCartaCompromiso(
+    @Param('id', ParseIntPipe) id: number, 
+    @Res() res: Response
+  ) {
+    const registro = await this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorId(id);
+    
+    if (!registro || !registro.carta_compromiso) {
+      return res.status(404).send('No se encontró el documento o no se ha subido la carta compromiso');
+    }
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="carta_compromiso.pdf"',
+    });
+
+    res.send(registro.carta_compromiso);
+  }
+
+  @Get('ver-carta-aceptacion/:id')
+  @ApiOperation({ summary: 'Ver el PDF de la carta de aceptación' })
+  async VerCartaAceptacion(
+    @Param('id', ParseIntPipe) id: number, 
+    @Res() res: Response
+  ) {
+    const registro = await this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorId(id);
+    
+    if (!registro || !registro.carta_aceptacion) {
+      return res.status(404).send('No se encontró el documento o no se ha subido la carta de aceptación');
+    }
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="carta_aceptacion.pdf"',
+    });
+
+    res.send(registro.carta_aceptacion);
+  }
+
+  @Get('ver-seguro-facultativo/:id')
+  @ApiOperation({ summary: 'Ver el PDF del seguro facultativo' })
+  async VerSeguroFacultativo(
+    @Param('id', ParseIntPipe) id: number, 
+    @Res() res: Response
+  ) {
+    const registro = await this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorId(id);
+    
+    if (!registro || !registro.seguro_facultativo) {
+      return res.status(404).send('No se encontró el documento o no se ha subido el seguro facultativo');
+    }
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="seguro_facultativo.pdf"',
+    });
+
+    res.send(registro.seguro_facultativo);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Subir documentos de un alumno' })
