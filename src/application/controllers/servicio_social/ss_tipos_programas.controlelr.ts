@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsTiposProgramas } from '../../logic/servicio_Social/Tipos_Programas/obtener_ss_tipos_programas';
 import { CrearSsTipoProgramaUseCase } from '../../logic/servicio_Social/Tipos_Programas/crear_ss_tipos_programas';
+import { EliminarSsTipoProgramaUseCase } from '../../logic/servicio_Social/Tipos_Programas/eliminar_tipos_programas';
 import { CrearSsTipoProgramaDto } from '../../../dtos/requests/Servicio Social/Tipos_Programas/crear_ss_tipos_programas';
 
 @ApiTags('Servicio Social - Tipos de Programas')
@@ -14,6 +15,7 @@ export class SsTiposProgramasController {
   constructor(
     private readonly obtenerSsTiposProgramasUseCase: ObtenerSsTiposProgramas,
     private readonly crearSsTipoProgramaUseCase: CrearSsTipoProgramaUseCase,
+    private readonly eliminarSsTipoProgramaUseCase: EliminarSsTipoProgramaUseCase,
   ) {}
 
   @Get()
@@ -61,6 +63,34 @@ export class SsTiposProgramasController {
     @Body() dto: CrearSsTipoProgramaDto
   ) {
     return this.crearSsTipoProgramaUseCase.Ejecutar(dto);
+  }
+
+  @Delete('id/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar tipo de programa por id' })
+  @ApiParam({ name: 'id', type: Number, description: 'Id del tipo de programa a eliminar' })
+  @ApiResponse({ status: 200, description: 'Tipo de programa eliminado correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Tipo de programa no encontrado' })
+  async EliminarPorId(
+    @Param('id', ParseIntPipe) id: number
+  ) {
+    await this.eliminarSsTipoProgramaUseCase.EliminarPorId(id);
+    return { mensaje: `Tipo de programa con id ${id} eliminado correctamente` };
+  }
+
+  @Delete('nombre/:nombreTipo')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar tipos de programas por nombre' })
+  @ApiParam({ name: 'nombreTipo', type: String, description: 'Nombre del tipo de programa a eliminar' })
+  @ApiResponse({ status: 200, description: 'Tipo de programa eliminado correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Tipo de programa no encontrado' })
+  async EliminarPorNombre(
+    @Param('nombreTipo') nombreTipo: string
+  ) {
+    await this.eliminarSsTipoProgramaUseCase.EliminarPorNombre(nombreTipo);
+    return { mensaje: `Tipo de programa ${nombreTipo} eliminado correctamente` };
   }
 
 }

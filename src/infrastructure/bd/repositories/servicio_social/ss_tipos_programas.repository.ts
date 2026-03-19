@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { SsTiposProgramasEntity } from '../../entities/servicio_social/ss_tipos_programas.entity';
@@ -50,6 +50,32 @@ export class SsTiposProgramasRepository implements ISsTiposProgramasRepository {
     const entityGuardada = await this.ssTiposProgramasRepository.save(entity);
 
     return this.MapearEntidadADominio(entityGuardada);
+  }
+
+  async Eliminar(id: number): Promise<void> {
+    const entity = await this.ssTiposProgramasRepository.findOne({
+      where: { id }
+    });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró el tipo de programa con id ${id}`);
+    }
+
+    await this.ssTiposProgramasRepository.delete(id);
+  }
+
+  async EliminarPorNombre(nombreTipo: string): Promise<void> {
+    const entities = await this.ssTiposProgramasRepository.find({
+      where: { nombre_tipo: ILike(`%${nombreTipo}%`) }
+    });
+
+    if (!entities || entities.length === 0) {
+      throw new NotFoundException(`No se encontró ningún tipo de programa con el nombre ${nombreTipo}`);
+    }
+
+    await this.ssTiposProgramasRepository.delete(
+      entities.map(entity => entity.id)
+    );
   }
 
 }
