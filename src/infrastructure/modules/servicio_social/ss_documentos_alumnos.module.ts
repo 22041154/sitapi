@@ -5,6 +5,7 @@ import { SsDocumentosAlumnosController } from '../../../application/controllers/
 import { ObtenerSsDocumentosAlumnos } from '../../../application/logic/servicio_Social/DocumentosAlumnos/obtener_ss_documentos_alumnos';
 import { CrearSsDocumentosAlumnosUseCase } from '../../../application/logic/servicio_Social/DocumentosAlumnos/crear_ss_documentos_alumnos';
 import { SsDocumentosAlumnosRepository } from '../../bd/repositories/servicio_social/ss_documentos_alumnos.repository';
+import { EliminarSsDocumentosAlumnosUseCase } from '../../../application/logic/servicio_Social/DocumentosAlumnos/eliminar_ss_documentos_alumnos';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SsDocumentosAlumnosEntity])],
@@ -12,6 +13,7 @@ import { SsDocumentosAlumnosRepository } from '../../bd/repositories/servicio_so
   providers: [
     ObtenerSsDocumentosAlumnos,
     CrearSsDocumentosAlumnosUseCase,
+    EliminarSsDocumentosAlumnosUseCase,
     {
       provide: 'ISsDocumentosAlumnosRepository',
       useClass: SsDocumentosAlumnosRepository,

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, HttpCode, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, HttpCode, HttpStatus, Res } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
@@ -6,6 +6,7 @@ import { ObtenerSsDocumentosAlumnos } from '../../logic/servicio_Social/Document
 import { CrearSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/DocumentosAlumnos/crear_ss_documentos_alumnos';
 import { CrearSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
 import { Response } from 'express';
+import { EliminarSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/DocumentosAlumnos/eliminar_ss_documentos_alumnos';
 
 @ApiTags('Servicio Social - Documentos Alumnos')
 @ApiBearerAuth('access-token')
@@ -14,7 +15,8 @@ import { Response } from 'express';
 export class SsDocumentosAlumnosController {
   constructor(
     private readonly obtenerSsDocumentosAlumnosUseCase: ObtenerSsDocumentosAlumnos,
-    private readonly crearSsDocumentosAlumnosUseCase: CrearSsDocumentosAlumnosUseCase, // Inyectamos el caso de uso del POST
+    private readonly crearSsDocumentosAlumnosUseCase: CrearSsDocumentosAlumnosUseCase,
+    private readonly eliminarSsDocumentosAlumnosUseCase: EliminarSsDocumentosAlumnosUseCase,
   ) {}
 
   @Get()
@@ -64,6 +66,7 @@ export class SsDocumentosAlumnosController {
 
     res.send(registro.carta_presentacion);
   }
+
   @Get('ver-carta-compromiso/:id')
   @ApiOperation({ summary: 'Ver el PDF de la carta compromiso' })
   async VerCartaCompromiso(
@@ -144,5 +147,18 @@ export class SsDocumentosAlumnosController {
     }
   ) {
     return this.crearSsDocumentosAlumnosUseCase.Ejecutar(dto, files);
+  }
+
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar un registro de documentos por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del registro a eliminar' })
+  @ApiResponse({ status: 200, description: 'Registro eliminado correctamente' })
+  @ApiResponse({ status: 404, description: 'Registro no encontrado' })
+  async Eliminar(@Param('id', ParseIntPipe) id: number) {
+    await this.eliminarSsDocumentosAlumnosUseCase.Ejecutar(id);
+    return { 
+      statusCode: 200,
+      message: `El registro de documentos con id ${id} fue eliminado correctamente.` 
+    };
   }
 }

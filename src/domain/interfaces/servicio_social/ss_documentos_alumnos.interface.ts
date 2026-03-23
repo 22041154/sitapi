@@ -6,6 +6,6 @@ export interface ISsDocumentosAlumnosRepository {
   ObtenerPorId(id: number): Promise<SsDocumentosAlumnosPoco | null>;
   ObtenerPorIdAlumnoAcademico(id_alumno_academico: number): Promise<SsDocumentosAlumnosPoco[]>;
   ObtenerPorIdPlanTrabajo(id_plan_trabajo: number): Promise<SsDocumentosAlumnosPoco[]>;
-  
   Crear(dto: CrearSsDocumentosAlumnosDto, archivos: any): Promise<SsDocumentosAlumnosPoco>;
+  Eliminar(id: number): Promise<void>;
 }

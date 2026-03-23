@@ -40,7 +40,7 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
     const entidades = await this.documentosRepository.find({ where: { id_alumno_academico } });
     return entidades.map(e => this.mapToPoco(e));
   }
-  
+
   async ObtenerPorIdPlanTrabajo(id_plan_trabajo: number): Promise<SsDocumentosAlumnosPoco[]> {
     const entidades = await this.documentosRepository.find({ where: { id_plan_trabajo } });
     return entidades.map(e => this.mapToPoco(e));
@@ -58,5 +58,9 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
     
     const entityGuardada = await this.documentosRepository.save(entity);
     return this.mapToPoco(entityGuardada);
+  }
+  
+  async Eliminar(id: number): Promise<void> {
+    await this.documentosRepository.delete(id);
   }
 }
