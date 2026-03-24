@@ -10,5 +10,7 @@ export interface ISsPermisosRepository {
   ObtenerPorNombrePermiso(permiso: string): Promise<SsPermisos[]>;
   
   Crear(dto: CrearSsPermisosDto): Promise<SsPermisos>;
+  
+  Eliminar(id: number): Promise<void>;
 
 }

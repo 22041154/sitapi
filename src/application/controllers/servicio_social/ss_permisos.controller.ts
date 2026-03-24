@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsPermisos } from '../../logic/servicio_Social/Permisos/obtener_ss_permisos';
 import { CrearSsPermisosDto } from '../../../dtos/requests/Servicio Social/Permisos/crear_ss_permisos.dto';
 import { CrearSsPermisosUseCase } from '../../logic/servicio_Social/Permisos/crear_ss_permisos';
+import { EliminarSsPermisosUseCase } from '../../logic/servicio_Social/Permisos/eliminar_ss_permisos';
 
 @ApiTags('Servicio Social - Permisos')
 @ApiBearerAuth('access-token')
@@ -14,6 +15,7 @@ export class SsPermisosController {
   constructor(
     private readonly obtenerSsPermisosUseCase: ObtenerSsPermisos,
     private readonly crearSsPermisosUseCase: CrearSsPermisosUseCase,
+    private readonly eliminarSsPermisosUseCase: EliminarSsPermisosUseCase,
   ) {}
 
   @Get()
@@ -55,6 +57,19 @@ export class SsPermisosController {
   @ApiBody({ type: CrearSsPermisosDto })
   async Crear(@Body() dto: CrearSsPermisosDto) {
     return this.crearSsPermisosUseCase.Ejecutar(dto);
+  }
+  
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar un permiso por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del permiso a eliminar' })
+  @ApiResponse({ status: 200, description: 'Permiso eliminado correctamente' })
+  @ApiResponse({ status: 404, description: 'Permiso no encontrado' })
+  async Eliminar(@Param('id', ParseIntPipe) id: number) {
+    await this.eliminarSsPermisosUseCase.Ejecutar(id);
+    return { 
+      statusCode: 200,
+      message: `El permiso con id ${id} fue eliminado correctamente.` 
+    };
   }
 
 }

@@ -41,6 +41,10 @@ export class SsPermisosRepository implements ISsPermisosRepository {
 
     return entities.map(entity => this.MapearEntidadADominio(entity));
   }
+  
+  async Eliminar(id: number): Promise<void> {
+    await this.ssPermisosRepository.delete(id);
+  }
 
   async Crear(dto: CrearSsPermisosDto): Promise<SsPermisos> {
     const entity = this.ssPermisosRepository.create({
