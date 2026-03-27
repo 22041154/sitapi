@@ -18,4 +18,6 @@ export interface ISsProgramasRepository {
   ObtenerVigentes(): Promise<SsProgramas[]>;
 
   Crear(dto: CrearSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas>;
+  
+  Eliminar(id: number): Promise<void>;
 }

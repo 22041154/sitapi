@@ -113,6 +113,9 @@ export class SsProgramasRepository implements ISsProgramasRepository {
 
     return results.map(row => this.MapearEntidadADominio(row));
   }
+    async Eliminar(id: number): Promise<void> {
+    await this.ssProgramasRepository.delete(id);
+  }
 
   async Crear(dto: CrearSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas> {
     const entity = this.ssProgramasRepository.create({

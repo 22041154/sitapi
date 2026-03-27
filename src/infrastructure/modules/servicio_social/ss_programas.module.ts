@@ -7,6 +7,7 @@ import { SsProgramasRepository } from '../../bd/repositories/servicio_social/ss_
 import { SsProgramasController } from '../../../application/controllers/servicio_social/ss_programas.controller';
 import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/Programas/obtemer_ss_programas';
 import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/crear_ss_programas';
+import {EliminarSsProgramasUseCase} from '../../../application/logic/servicio_Social/Programas/eliminar_ss_programas';
 
 @Module({
   imports: [
@@ -20,6 +21,8 @@ import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Soci
   providers: [
     ObtenerSsProgramas,
     CrearSsProgramaUseCase,
+    EliminarSsProgramasUseCase,
+
     {
       provide: 'ISsProgramasRepository',
       useClass: SsProgramasRepository,
@@ -33,6 +36,7 @@ import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Soci
   exports: [
     ObtenerSsProgramas,
     CrearSsProgramaUseCase,
+    EliminarSsProgramasUseCase,
   ],
 })
 export class SsProgramasModule {}

@@ -9,14 +9,12 @@ export class EliminarSsPermisosUseCase {
   ) {}
 
   async Ejecutar(id: number): Promise<void> {
-    // Verificamos si existe el permiso
     const permisoExistente = await this.ssPermisosRepository.ObtenerPorId(id);
     
     if (!permisoExistente) {
       throw new NotFoundException(`No se encontró el permiso con el id ${id}`);
     }
 
-    // Si existe, lo borramos
     await this.ssPermisosRepository.Eliminar(id);
   }
 }

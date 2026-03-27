@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsProgramas } from '../../logic/servicio_Social/Programas/obtemer_ss_programas';
 import { CrearSsProgramaUseCase } from '../../logic/servicio_Social/Programas/crear_ss_programas';
 import { CrearSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
+import { EliminarSsProgramasUseCase } from '../../logic/servicio_Social/Programas/eliminar_ss_programas';
 
 @ApiTags('Servicio Social - Programas')
 @ApiBearerAuth('access-token')
@@ -15,6 +16,7 @@ export class SsProgramasController {
   constructor(
     private readonly obtenerSsProgramasUseCase: ObtenerSsProgramas,
     private readonly crearSsProgramaUseCase: CrearSsProgramaUseCase,
+    private readonly eliminarSsProgramasUseCase: EliminarSsProgramasUseCase,
   ) {}
 
   @Get()
@@ -94,6 +96,19 @@ export class SsProgramasController {
   ) {
     return this.obtenerSsProgramasUseCase.ObtenerPorModalidad(modalidad);
   }
+  
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar un programa por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del programa a eliminar' })
+  @ApiResponse({ status: 200, description: 'Programa eliminado correctamente' })
+  @ApiResponse({ status: 404, description: 'Programa no encontrado' })
+  async Eliminar(@Param('id', ParseIntPipe) id: number) {
+    await this.eliminarSsProgramasUseCase.Ejecutar(id);
+    return { 
+      statusCode: 200,
+      message: `El programa con id ${id} fue eliminado correctamente.` 
+    };
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -111,5 +126,7 @@ export class SsProgramasController {
     const planTrabajo = file ? file.buffer : undefined;
     return this.crearSsProgramaUseCase.Ejecutar(dto, planTrabajo);
   }
+
+  
 
 }
