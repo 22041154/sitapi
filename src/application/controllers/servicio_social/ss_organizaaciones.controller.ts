@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Delete, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Put, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsOrganizaciones } from '../../logic/servicio_Social/Organizaciones/obtener_ss_organizaciones';
 import { CrearSsOrganizacionUseCase } from '../../logic/servicio_Social/Organizaciones/crear_ss_organizaciones';
 import { EliminarSsOrganizacionUseCase } from '../../logic/servicio_Social/Organizaciones/eliminar_ss_organizaciones';
 import { CrearSsOrganizacionDto } from '../../../dtos/requests/Servicio Social/Organizaciones/Crear_Organoiazciones_DTO';
+import { ActualizarSsOrganizacionDto } from '../../../dtos/requests/Servicio Social/Organizaciones/Actualizar_Organizaciones_DTO';
+import { ActualizarSsOrganizacionUseCase } from '../../logic/servicio_Social/Organizaciones/actualizar_organizaciones';
 
 @ApiTags('Servicio Social - Organizaciones')
 @ApiBearerAuth('access-token')
@@ -16,6 +18,7 @@ export class SsOrganizacionesController {
     private readonly obtenerSsOrganizacionesUseCase: ObtenerSsOrganizaciones,
     private readonly crearSsOrganizacionUseCase: CrearSsOrganizacionUseCase,
     private readonly eliminarSsOrganizacionUseCase: EliminarSsOrganizacionUseCase,
+    private readonly actualizarSsOrganizacionUseCase: ActualizarSsOrganizacionUseCase,
   ) {}
 
   @Get()
@@ -103,4 +106,19 @@ export class SsOrganizacionesController {
     await this.eliminarSsOrganizacionUseCase.EliminarPorNombre(nombre);
   }
 
+  @Put('id/:id')
+  @ApiOperation({ summary: 'Actualizar organización por id' })
+  @ApiParam({ name: 'id', type: Number, description: 'Id de la organización a actualizar' })
+  @ApiBody({ type: ActualizarSsOrganizacionDto })
+  @ApiResponse({ status: 200, description: 'Organización actualizada correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Organización no encontrada' })
+  @ApiResponse({ status: 409, description: 'Ya existe una organización con ese nombre' })
+  async Actualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ActualizarSsOrganizacionDto
+    ) {
+      return this.actualizarSsOrganizacionUseCase.Ejecutar(id, dto);
+    }
 }

@@ -6,6 +6,7 @@ import { SsOrganizacionesController } from '../../../application/controllers/ser
 import { ObtenerSsOrganizaciones } from '../../../application/logic/servicio_Social/Organizaciones/obtener_ss_organizaciones';
 import { CrearSsOrganizacionUseCase } from '../../../application/logic/servicio_Social/Organizaciones/crear_ss_organizaciones';
 import { EliminarSsOrganizacionUseCase } from '../../../application/logic/servicio_Social/Organizaciones/eliminar_ss_organizaciones';
+import { ActualizarSsOrganizacionUseCase } from '../../../application/logic/servicio_Social/Organizaciones/actualizar_organizaciones';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EliminarSsOrganizacionUseCase } from '../../../application/logic/servic
     ObtenerSsOrganizaciones,
     CrearSsOrganizacionUseCase,
     EliminarSsOrganizacionUseCase,
+    ActualizarSsOrganizacionUseCase,
     {
       provide: 'ISsOrganizacionesRepository',
       useClass: SsOrganizacionesRepository,

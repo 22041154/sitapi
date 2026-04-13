@@ -5,6 +5,7 @@ import { SsOrganizacionesEntity } from '../../entities/servicio_social/ss_organi
 import { SsOrganizaciones } from '../../../../dtos/POCOS/servicio_social/ss_organizaciones.poco';
 import { ISsOrganizacionesRepository } from '../../../../domain/interfaces/servicio_social/ss_organizaciones';
 import { CrearSsOrganizacionDto } from '../../../../dtos/requests/Servicio Social/Organizaciones/Crear_Organoiazciones_DTO';
+import { ActualizarSsOrganizacionDto } from '../../../../dtos/requests/Servicio Social/Organizaciones/Actualizar_Organizaciones_DTO';
 
 @Injectable()
 export class SsOrganizacionesRepository implements ISsOrganizacionesRepository {
@@ -90,4 +91,25 @@ export class SsOrganizacionesRepository implements ISsOrganizacionesRepository {
     );
   }
 
+  async Actualizar(id: number, dto: ActualizarSsOrganizacionDto): Promise<SsOrganizaciones> {
+    const entity = await this.ssOrganizacionesRepository.findOne({
+      where: { id }
+    });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró la organización con id ${id}`);
+    }
+
+    if (dto.nombre_organizacion !== undefined)
+      entity.nombre_organizacion = dto.nombre_organizacion;
+
+    if (dto.nombre_titular_organizacion !== undefined)
+      entity.nombre_titular_organizacion = dto.nombre_titular_organizacion;
+
+    if (dto.puesto_titular_organizaciones !== undefined)
+      entity.puesto_titular_organizaciones = dto.puesto_titular_organizaciones;
+
+    const entityActualizada = await this.ssOrganizacionesRepository.save(entity);
+    return this.MapearEntidadADominio(entityActualizada);
+  }
 }
