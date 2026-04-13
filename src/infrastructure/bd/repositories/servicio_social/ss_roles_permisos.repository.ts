@@ -87,5 +87,9 @@ export class SsRolesPermisosRepository implements ISsRolesPermisosRepository {
 
     return this.ObtenerPorId(Number(entityGuardada.id));
   }
+  
+  async Eliminar(id: number): Promise<void> {
+    await this.ssRolesPermisosRepository.delete(id);
+  }
 
 }

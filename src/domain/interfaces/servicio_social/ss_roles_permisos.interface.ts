@@ -7,4 +7,5 @@ export interface ISsRolesPermisosRepository {
   ObtenerPorRol(idRol: number): Promise<SsRolesPermisos[]>;
   ObtenerPorPermiso(idPermiso: number): Promise<SsRolesPermisos[]>;
   Crear(dto: CrearSsRolPermisoDto): Promise<SsRolesPermisos>;
+  Eliminar(id: number): Promise<void>;
 }

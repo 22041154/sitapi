@@ -7,6 +7,7 @@ import { SsRolesPermisosRepository } from '../../bd/repositories/servicio_social
 import { SsRolesPermisosController } from '../../../application/controllers/servicio_social/ss_roles_permisos.controller';
 import { ObtenerSsRolesPermisosUseCase } from '../../../application/logic/servicio_Social/Roles_Permisos/obtener_ss_roles_permisos';
 import { CrearSsRolPermisoUseCase } from '../../../application/logic/servicio_Social/Roles_Permisos/craer_ss_roles_permisos';
+import { EliminarSsRolesPermisosUseCase } from '../../../application/logic/servicio_Social/Roles_Permisos/eliminar_ss_roles_permisos';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { CrearSsRolPermisoUseCase } from '../../../application/logic/servicio_So
   providers: [
     ObtenerSsRolesPermisosUseCase,
     CrearSsRolPermisoUseCase,
+    EliminarSsRolesPermisosUseCase,
     {
       provide: 'ISsRolesPermisosRepository',
       useClass: SsRolesPermisosRepository,

@@ -51,5 +51,8 @@ export class SsRolesRepository implements ISsRolesRepository {
     const entityGuardada = await this.ssRolesRepository.save(entity);
     return this.MapearEntidadADominio(entityGuardada);
   }
+  async Eliminar(id: number): Promise<void> {
+    await this.ssRolesRepository.delete(id);
+  }
 
 }

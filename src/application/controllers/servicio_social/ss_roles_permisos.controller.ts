@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsRolesPermisosUseCase } from '../../logic/servicio_Social/Roles_Permisos/obtener_ss_roles_permisos';
 import { CrearSsRolPermisoUseCase } from '../../logic/servicio_Social/Roles_Permisos/craer_ss_roles_permisos';
 import { CrearSsRolPermisoDto } from '../../../dtos/requests/Servicio Social/Roles_Permisos/crear_ss_roles_permisos.dto';
+import { EliminarSsRolesPermisosUseCase } from '../../logic/servicio_Social/Roles_Permisos/eliminar_ss_roles_permisos';
 
 @ApiTags('Servicio Social - Roles Permisos')
 @ApiBearerAuth('access-token')
@@ -14,6 +15,7 @@ export class SsRolesPermisosController {
   constructor(
     private readonly obtenerSsRolesPermisosUseCase: ObtenerSsRolesPermisosUseCase,
     private readonly crearSsRolPermisoUseCase: CrearSsRolPermisoUseCase,
+    private readonly eliminarSsRolesPermisosUseCase: EliminarSsRolesPermisosUseCase,
   ) {}
 
   @Get()
@@ -73,6 +75,18 @@ export class SsRolesPermisosController {
     @Body() dto: CrearSsRolPermisoDto
   ) {
     return this.crearSsRolPermisoUseCase.Ejecutar(dto);
+  }
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar una asignación de rol-permiso por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID de la asignación a eliminar' })
+  @ApiResponse({ status: 200, description: 'Asignación eliminada correctamente' })
+  @ApiResponse({ status: 404, description: 'Asignación no encontrada' })
+  async Eliminar(@Param('id', ParseIntPipe) id: number) {
+    await this.eliminarSsRolesPermisosUseCase.Ejecutar(id);
+    return { 
+      statusCode: 200,
+      message: `La asignación con id ${id} fue eliminada correctamente.` 
+    };
   }
 
 }

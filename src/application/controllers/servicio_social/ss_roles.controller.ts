@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsRoles } from '../../logic/servicio_Social/Roles/obtener_ss_roles';
 import { CrearSsRolesUseCase } from '../../logic/servicio_Social/Roles/crear_ss_roles';
 import { CrearSsRolesDto } from '../../../dtos/requests/Servicio Social/Roles/crear_ss_roles.dto';
+import { EliminarSsRolesUseCase } from '../../logic/servicio_Social/Roles/eliminar_ss_roles';
 
 
 @ApiTags('Servicio Social - Roles')
@@ -15,6 +16,7 @@ export class SsRolesController {
   constructor(
     private readonly obtenerSsRolesUseCase: ObtenerSsRoles,
     private readonly crearSsRolesUseCase: CrearSsRolesUseCase,
+    private readonly eliminarSsRolesUseCase: EliminarSsRolesUseCase,
   ) {}
 
   @Get()
@@ -61,5 +63,16 @@ export class SsRolesController {
     return this.crearSsRolesUseCase.Ejecutar(dto);
   }
   
-
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar un rol por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del rol a eliminar' })
+  @ApiResponse({ status: 200, description: 'Rol eliminado correctamente' })
+  @ApiResponse({ status: 404, description: 'Rol no encontrado' })
+  async Eliminar(@Param('id', ParseIntPipe) id: number) {
+    await this.eliminarSsRolesUseCase.Ejecutar(id);
+    return { 
+      statusCode: 200,
+      message: `El rol con id ${id} fue eliminado correctamente.` 
+    };
+  }
 }

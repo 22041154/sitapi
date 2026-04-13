@@ -10,4 +10,6 @@ export interface ISsRolesRepository {
   ObtenerPorNombreRol(rol: string): Promise<SsRoles[]>;
 
   Crear(dto: CrearSsRolesDto): Promise<SsRoles>;
+
+  Eliminar(id: number): Promise<void>;
 }
