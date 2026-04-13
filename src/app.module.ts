@@ -7,7 +7,7 @@ import {
 
 import { ConfigModule } from '@nestjs/config';
 
-// Módulos
+// Módulos para inicios de seion
 import { BdModule } from './infrastructure/modules/bd.module';
 import { AuthModule } from './infrastructure/security/auth/auth.module';
 import { AlumnoDatosAcademicosModule } from './infrastructure/modules/alumnos_datos_academicos.module';
@@ -24,7 +24,7 @@ import { SsRolesPermisosModule } from './infrastructure/modules/servicio_social/
 import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_social/ss_documentos_alumnos.module';
 @Module({
   imports: [
-    // Configuración global de variables de entorno
+    // Configuración de variables de entorno
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
