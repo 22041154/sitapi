@@ -6,6 +6,7 @@ import { SsRolesController } from '../../../application/controllers/servicio_soc
 import { ObtenerSsRoles } from '../../../application/logic/servicio_Social/Roles/obtener_ss_roles';
 import { CrearSsRolesUseCase } from '../../../application/logic/servicio_Social/Roles/crear_ss_roles';
 import { EliminarSsRolesUseCase } from '../../../application/logic/servicio_Social/Roles/eliminar_ss_roles';
+import { ActualizarSsRolesUseCase } from '../../../application/logic/servicio_Social/Roles/actualizar_ss_roles';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EliminarSsRolesUseCase } from '../../../application/logic/servicio_Soci
     ObtenerSsRoles,
     CrearSsRolesUseCase,
     EliminarSsRolesUseCase,
+    ActualizarSsRolesUseCase,
     {
       provide: 'ISsRolesRepository',
       useClass: SsRolesRepository,

@@ -1,13 +1,16 @@
-import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsString, IsOptional, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CrearSsRolesDto {
+export class ActualizarSsRolesDto {
+
   @ApiProperty({
     example: 'Administrador',
     description: 'Nombre del rol',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MaxLength(50)
-  rol: string;
+  rol?: string;
+
 }
