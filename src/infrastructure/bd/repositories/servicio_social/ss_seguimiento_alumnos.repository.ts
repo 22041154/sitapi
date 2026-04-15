@@ -49,6 +49,9 @@ export class SsSeguimientoAlumnosRepository implements ISsSeguimientoAlumnosRepo
     });
     
     const entityGuardada = await this.seguimientoAlumnosRepository.save(entity);
-    return this.mapToPoco(entityGuardada); // Reutilizamos tu función privada de mapeo
+    return this.mapToPoco(entityGuardada);
+  }
+  async Eliminar(id: number): Promise<void> {
+    await this.seguimientoAlumnosRepository.delete(id); 
   }
 }

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Delete, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsSeguimientoAlumnos } from '../../logic/servicio_Social/SeguimientoAlumnos/obtener_ss_seguimiento_alumnos';
 import { CrearSsSeguimientoAlumnosDto } from '../../../dtos/requests/Servicio Social/SeguimientoAlumnos/crear_ss_seguimiento_alumnos.dto';
 import { CrearSsSeguimientoAlumnosUseCase } from '../../logic/servicio_Social/SeguimientoAlumnos/crear_ss_seguimiento_alumnos';
+import { EliminarSsSeguimientoAlumnosUseCase } from '../../logic/servicio_Social/SeguimientoAlumnos/eliminar_ss_seguimiento_alumnos';
 
 @ApiTags('Servicio Social - Seguimiento Alumnos')
 @ApiBearerAuth('access-token')
@@ -13,6 +14,7 @@ export class SsSeguimientoAlumnosController {
   constructor(
     private readonly obtenerSsSeguimientoAlumnosUseCase: ObtenerSsSeguimientoAlumnos,
     private readonly crearSsSeguimientoAlumnosUseCase: CrearSsSeguimientoAlumnosUseCase,
+    private readonly eliminarSsSeguimientoAlumnosUseCase: EliminarSsSeguimientoAlumnosUseCase,
   ) {}
 
   @Get()
@@ -60,5 +62,15 @@ export class SsSeguimientoAlumnosController {
   @ApiBody({ type: CrearSsSeguimientoAlumnosDto })
   async Crear(@Body() dto: CrearSsSeguimientoAlumnosDto) {
     return this.crearSsSeguimientoAlumnosUseCase.Ejecutar(dto);
+  }
+
+  @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar un seguimiento de alumno' })
+  @ApiParam({ name: 'id', type: Number, description: 'Id del seguimiento' })
+  @ApiResponse({ status: 200, description: 'Seguimiento eliminado correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Seguimiento no encontrado' })
+  async Eliminar(@Param('id', ParseIntPipe) id: number) {
+    return this.eliminarSsSeguimientoAlumnosUseCase.Ejecutar(id);
   }
 }

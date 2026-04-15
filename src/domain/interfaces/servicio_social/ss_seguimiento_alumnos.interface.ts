@@ -7,4 +7,5 @@ export interface ISsSeguimientoAlumnosRepository {
   ObtenerPorIdAlumnoAcademico(id_alumno_academico: number): Promise<SsSeguimientoAlumnosPoco[]>;
   ObtenerPorIdPrograma(id_programa: number): Promise<SsSeguimientoAlumnosPoco[]>;
   Crear(dto: CrearSsSeguimientoAlumnosDto): Promise<SsSeguimientoAlumnosPoco>;
+  Eliminar(id: number): Promise<void>;
 }
