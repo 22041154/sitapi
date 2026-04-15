@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SsProgramasEntity } from '../../entities/servicio_social/ss_programas.entity';
@@ -7,6 +7,7 @@ import { SsTiposProgramasEntity } from '../../entities/servicio_social/ss_tipos_
 import { SsProgramas } from '../../../../dtos/POCOS/servicio_social/ss_programas.poco';
 import { ISsProgramasRepository } from '../../../../domain/interfaces/servicio_social/ss_programas.interface';
 import { CrearSsProgramaDto } from '../../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
+import { ActualizarSsProgramaDto } from '../../../../dtos/requests/Servicio Social/Programas/avtualizar_ss_programas';
 
 @Injectable()
 export class SsProgramasRepository implements ISsProgramasRepository {
@@ -134,4 +135,33 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     return this.ObtenerPorId(Number(entityGuardada.id));
   }
 
+  async Actualizar(id: number, dto: ActualizarSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas> {
+    const entity = await this.ssProgramasRepository.findOne({
+      where: { id }
+    });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró el programa con id ${id}`);
+    }
+
+    if (dto.id_organizacion !== undefined)
+      entity.id_organizacion = dto.id_organizacion;
+    if (dto.id_tipo_programa !== undefined)
+      entity.id_tipo_programa = dto.id_tipo_programa;
+    if (dto.nombre_programa !== undefined)
+      entity.nombre_programa = dto.nombre_programa;
+    if (dto.modalidad !== undefined)
+      entity.modalidad = dto.modalidad;
+    if (dto.fecha_inicio_servicio !== undefined)
+      entity.fecha_inicio_servicio = new Date(dto.fecha_inicio_servicio);
+    if (dto.fecha_fin_servicio !== undefined)
+      entity.fecha_fin_servicio = new Date(dto.fecha_fin_servicio);
+    if (dto.lista_actividades !== undefined)
+      entity.lista_actividades = dto.lista_actividades;
+    if (planTrabajo !== undefined)
+      entity.plan_trabajo = planTrabajo;
+
+    const entityActualizada = await this.ssProgramasRepository.save(entity);
+    return this.ObtenerPorId(Number(entityActualizada.id));
+  }
 }

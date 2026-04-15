@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
@@ -6,6 +6,9 @@ import { ObtenerSsProgramas } from '../../logic/servicio_Social/Programas/obteme
 import { CrearSsProgramaUseCase } from '../../logic/servicio_Social/Programas/crear_ss_programas';
 import { CrearSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 import { EliminarSsProgramasUseCase } from '../../logic/servicio_Social/Programas/eliminar_ss_programas';
+import { ActualizarSsProgramaUseCase } from '../../logic/servicio_Social/Programas/actualizar_ss_programas';
+import { ActualizarSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/avtualizar_ss_programas';
+import { SsProgramasPresenter } from '../../presenters/servicio_social/ss_programas.presenter';
 
 @ApiTags('Servicio Social - Programas')
 @ApiBearerAuth('access-token')
@@ -17,6 +20,7 @@ export class SsProgramasController {
     private readonly obtenerSsProgramasUseCase: ObtenerSsProgramas,
     private readonly crearSsProgramaUseCase: CrearSsProgramaUseCase,
     private readonly eliminarSsProgramasUseCase: EliminarSsProgramasUseCase,
+    private readonly actualizarSsProgramasUseCase: ActualizarSsProgramaUseCase,
   ) {}
 
   @Get()
@@ -127,6 +131,23 @@ export class SsProgramasController {
     return this.crearSsProgramaUseCase.Ejecutar(dto, planTrabajo);
   }
 
-  
-
+  @Put('id/:id')
+  @UseInterceptors(FileInterceptor('plan_trabajo'))
+  @ApiOperation({ summary: 'Actualizar un programa por ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', type: Number, description: 'ID del programa a actualizar' })
+  @ApiResponse({ status: 200, description: 'Programa actualizado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Programa no encontrado' })
+  @ApiResponse({ status: 409, description: 'Ya existe un programa con ese nombre' })
+  async Actualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ActualizarSsProgramaDto,
+    @UploadedFile() file?: any,
+  )  {
+    const planTrabajo = file ? file.buffer : undefined;
+    const poco = await this.actualizarSsProgramasUseCase.Ejecutar(id, dto, planTrabajo);
+    return SsProgramasPresenter.Presentar(poco);
+  }
 }
