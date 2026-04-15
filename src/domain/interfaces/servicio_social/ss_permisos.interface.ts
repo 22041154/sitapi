@@ -1,4 +1,5 @@
 import { SsPermisos } from "../../../dtos/POCOS/servicio_social/ss_permisos.poco";
+import { ActualizarSsPermisosDto } from "../../../dtos/requests/Servicio Social/Permisos/actualizar_ss_permisos.dto";
 import { CrearSsPermisosDto } from "../../../dtos/requests/Servicio Social/Permisos/crear_ss_permisos.dto";
 
 export interface ISsPermisosRepository {
@@ -13,4 +14,5 @@ export interface ISsPermisosRepository {
   
   Eliminar(id: number): Promise<void>;
 
+  Actualizar(id: number, dto: ActualizarSsPermisosDto): Promise<SsPermisos>;
 }

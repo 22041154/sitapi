@@ -8,5 +8,6 @@ export class SsPermisosEntity {
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   permiso: string;
+  descripcion: string;
 
 }

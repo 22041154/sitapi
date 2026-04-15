@@ -6,6 +6,7 @@ import { SsPermisosController } from '../../../application/controllers/servicio_
 import { ObtenerSsPermisos } from '../../../application/logic/servicio_Social/Permisos/obtener_ss_permisos';
 import { CrearSsPermisosUseCase } from '../../../application/logic/servicio_Social/Permisos/crear_ss_permisos';
 import { EliminarSsPermisosUseCase } from '../../../application/logic/servicio_Social/Permisos/eliminar_ss_permisos';
+import { ActualizarSsPermisosUseCase } from '../../../application/logic/servicio_Social/Permisos/actualizar_ss_permisos';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EliminarSsPermisosUseCase } from '../../../application/logic/servicio_S
     ObtenerSsPermisos,
     CrearSsPermisosUseCase,
     EliminarSsPermisosUseCase,
+    ActualizarSsPermisosUseCase,
     {
       provide: 'ISsPermisosRepository',
       useClass: SsPermisosRepository,

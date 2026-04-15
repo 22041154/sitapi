@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { SsPermisosEntity } from '../../entities/servicio_social/ss_permisos.entity';
 import { SsPermisos } from '../../../../dtos/POCOS/servicio_social/ss_permisos.poco';
 import { ISsPermisosRepository } from '../../../../domain/interfaces/servicio_social/ss_permisos.interface';
 import { CrearSsPermisosDto } from '../../../../dtos/requests/Servicio Social/Permisos/crear_ss_permisos.dto';
+import { ActualizarSsPermisosDto } from '../../../../dtos/requests/Servicio Social/Permisos/actualizar_ss_permisos.dto';
 
 @Injectable()
 export class SsPermisosRepository implements ISsPermisosRepository {
@@ -52,5 +53,18 @@ export class SsPermisosRepository implements ISsPermisosRepository {
     });
     const entityGuardada = await this.ssPermisosRepository.save(entity);
     return this.MapearEntidadADominio(entityGuardada);
+  }
+  async Actualizar(id: number, dto: ActualizarSsPermisosDto): Promise<SsPermisos> {
+    const entity = await this.ssPermisosRepository.findOne({ where: { id } });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró el permiso con id ${id}`);
+    }
+    if (dto.permiso !== undefined) entity.permiso = dto.permiso;
+    if (dto.descripcion !== undefined) entity.descripcion = dto.descripcion;
+
+    const entityActualizada = await this.ssPermisosRepository.save(entity);
+  
+    return this.MapearEntidadADominio(entityActualizada); 
   }
 }

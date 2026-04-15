@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsPermisos } from '../../logic/servicio_Social/Permisos/obtener_ss_permisos';
 import { CrearSsPermisosDto } from '../../../dtos/requests/Servicio Social/Permisos/crear_ss_permisos.dto';
 import { CrearSsPermisosUseCase } from '../../logic/servicio_Social/Permisos/crear_ss_permisos';
 import { EliminarSsPermisosUseCase } from '../../logic/servicio_Social/Permisos/eliminar_ss_permisos';
+import { ActualizarSsPermisosDto } from '../../../dtos/requests/Servicio Social/Permisos/actualizar_ss_permisos.dto';
+import { ActualizarSsPermisosUseCase } from '../../logic/servicio_Social/Permisos/actualizar_ss_permisos';
 
 @ApiTags('Servicio Social - Permisos')
 @ApiBearerAuth('access-token')
@@ -16,6 +18,7 @@ export class SsPermisosController {
     private readonly obtenerSsPermisosUseCase: ObtenerSsPermisos,
     private readonly crearSsPermisosUseCase: CrearSsPermisosUseCase,
     private readonly eliminarSsPermisosUseCase: EliminarSsPermisosUseCase,
+    private readonly actualizarSsPermisosUseCase: ActualizarSsPermisosUseCase,
   ) {}
 
   @Get()
@@ -70,6 +73,19 @@ export class SsPermisosController {
       statusCode: 200,
       message: `El permiso con id ${id} fue eliminado correctamente.` 
     };
+  }
+  @Put('id/:id')
+  @ApiOperation({ summary: 'Actualizar un permiso por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del permiso a actualizar' })
+  @ApiBody({ type: ActualizarSsPermisosDto })
+  @ApiResponse({ status: 200, description: 'Permiso actualizado correctamente' })
+  @ApiResponse({ status: 404, description: 'Permiso no encontrado' })
+  @ApiResponse({ status: 409, description: 'Conflicto: Ya existe un permiso con ese nombre' })
+  async Actualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ActualizarSsPermisosDto
+  ) {
+    return this.actualizarSsPermisosUseCase.Ejecutar(id, dto);
   }
 
 }
