@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Delete, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Put, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsTiposProgramas } from '../../logic/servicio_Social/Tipos_Programas/obtener_ss_tipos_programas';
 import { CrearSsTipoProgramaUseCase } from '../../logic/servicio_Social/Tipos_Programas/crear_ss_tipos_programas';
 import { EliminarSsTipoProgramaUseCase } from '../../logic/servicio_Social/Tipos_Programas/eliminar_tipos_programas';
 import { CrearSsTipoProgramaDto } from '../../../dtos/requests/Servicio Social/Tipos_Programas/crear_ss_tipos_programas';
+import { ActualizarSsTipoProgramaUseCase } from '../../logic/servicio_Social/Tipos_Programas/actualizar_ss_tipos_programas.use.case';
+import { ActualizarSsTipoProgramaDto } from '../../../dtos/requests/Servicio Social/Tipos_Programas/actualizar_ss_tipos_programas';
 
 @ApiTags('Servicio Social - Tipos de Programas')
 @ApiBearerAuth('access-token')
@@ -16,6 +18,7 @@ export class SsTiposProgramasController {
     private readonly obtenerSsTiposProgramasUseCase: ObtenerSsTiposProgramas,
     private readonly crearSsTipoProgramaUseCase: CrearSsTipoProgramaUseCase,
     private readonly eliminarSsTipoProgramaUseCase: EliminarSsTipoProgramaUseCase,
+    private readonly actualizarSsTipoProgramaUseCase: ActualizarSsTipoProgramaUseCase,
   ) {}
 
   @Get()
@@ -93,4 +96,19 @@ export class SsTiposProgramasController {
     return { mensaje: `Tipo de programa ${nombreTipo} eliminado correctamente` };
   }
 
+  @Put('id/:id')
+  @ApiOperation({ summary: 'Actualizar tipo de programa por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del tipo de programa a actualizar' })
+  @ApiBody({ type: ActualizarSsTipoProgramaDto })
+  @ApiResponse({ status: 200, description: 'Tipo de programa actualizado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Tipo de programa no encontrado' })
+  @ApiResponse({ status: 409, description: 'Ya existe un tipo de programa con ese nombre' })
+  async Actualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ActualizarSsTipoProgramaDto
+  ) {
+    return this.actualizarSsTipoProgramaUseCase.Ejecutar(id, dto);
+  }
 }

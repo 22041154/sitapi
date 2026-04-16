@@ -6,6 +6,7 @@ import { SsTiposProgramasController } from '../../../application/controllers/ser
 import { ObtenerSsTiposProgramas } from '../../../application/logic/servicio_Social/Tipos_Programas/obtener_ss_tipos_programas';
 import { CrearSsTipoProgramaUseCase } from '../../../application/logic/servicio_Social/Tipos_Programas/crear_ss_tipos_programas';
 import { EliminarSsTipoProgramaUseCase } from '../../../application/logic/servicio_Social/Tipos_Programas/eliminar_tipos_programas';
+import { ActualizarSsTipoProgramaUseCase } from '../../../application/logic/servicio_Social/Tipos_Programas/actualizar_ss_tipos_programas.use.case';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EliminarSsTipoProgramaUseCase } from '../../../application/logic/servic
     ObtenerSsTiposProgramas,
     CrearSsTipoProgramaUseCase,
     EliminarSsTipoProgramaUseCase,
+    ActualizarSsTipoProgramaUseCase,
     {
       provide: 'ISsTiposProgramasRepository',
       useClass: SsTiposProgramasRepository,

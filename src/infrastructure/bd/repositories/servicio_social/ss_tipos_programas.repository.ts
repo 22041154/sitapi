@@ -5,6 +5,7 @@ import { SsTiposProgramasEntity } from '../../entities/servicio_social/ss_tipos_
 import { SsTiposProgramas } from '../../../../dtos/POCOS/servicio_social/ss_tipos_programas.poco';
 import { ISsTiposProgramasRepository } from '../../../../domain/interfaces/servicio_social/ss_tipos_programas.interface';
 import { CrearSsTipoProgramaDto } from '../../../../dtos/requests/Servicio Social/Tipos_Programas/crear_ss_tipos_programas';
+import { ActualizarSsTipoProgramaDto } from '../../../../dtos/requests/Servicio Social/Tipos_Programas/actualizar_ss_tipos_programas';
 
 @Injectable()
 export class SsTiposProgramasRepository implements ISsTiposProgramasRepository {
@@ -76,6 +77,23 @@ export class SsTiposProgramasRepository implements ISsTiposProgramasRepository {
     await this.ssTiposProgramasRepository.delete(
       entities.map(entity => entity.id)
     );
+  }
+
+  async Actualizar(id: number, dto: ActualizarSsTipoProgramaDto): Promise<SsTiposProgramas> {
+    const entity = await this.ssTiposProgramasRepository.findOne({
+      where: { id }
+    });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró el tipo de programa con id ${id}`);
+    }
+
+    if (dto.nombre_tipo !== undefined) {
+      entity.nombre_tipo = dto.nombre_tipo;
+    }
+
+    const entityActualizada = await this.ssTiposProgramasRepository.save(entity);
+    return this.MapearEntidadADominio(entityActualizada);
   }
 
 }
