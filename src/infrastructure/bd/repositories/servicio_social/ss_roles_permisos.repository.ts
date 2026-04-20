@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SsRolesPermisosEntity } from '../../entities/servicio_social/ss_roles_permisos.entity';
@@ -7,6 +7,7 @@ import { SsPermisosEntity } from '../../entities/servicio_social/ss_permisos.ent
 import { SsRolesPermisos } from '../../../../dtos/POCOS/servicio_social/ss_roles_permisos.poco';
 import { ISsRolesPermisosRepository } from '../../../../domain/interfaces/servicio_social/ss_roles_permisos.interface';
 import { CrearSsRolPermisoDto } from '../../../../dtos/requests/Servicio Social/Roles_Permisos/crear_ss_roles_permisos.dto';
+import { ActualizarSsRolPermisoDto } from '../../../../dtos/requests/Servicio Social/Roles_Permisos/actualizar_ss_roles_permisos.dto';
 
 @Injectable()
 export class SsRolesPermisosRepository implements ISsRolesPermisosRepository {
@@ -91,5 +92,24 @@ export class SsRolesPermisosRepository implements ISsRolesPermisosRepository {
   async Eliminar(id: number): Promise<void> {
     await this.ssRolesPermisosRepository.delete(id);
   }
+
+  async Actualizar(id: number, dto: ActualizarSsRolPermisoDto): Promise<SsRolesPermisos> {
+  const entity = await this.ssRolesPermisosRepository.findOne({
+    where: { id }
+  });
+
+  if (!entity) {
+    throw new NotFoundException(`No se encontró la asignación rol-permiso con id ${id}`);
+  }
+
+  if (dto.id_ss_rol !== undefined)
+    entity.id_ss_rol = dto.id_ss_rol;
+  if (dto.id_ss_permiso !== undefined)
+    entity.id_ss_permiso = dto.id_ss_permiso;
+
+  const entityActualizada = await this.ssRolesPermisosRepository.save(entity);
+  // Retorna el POCO completo (con nombres de rol y permiso)
+  return this.ObtenerPorId(Number(entityActualizada.id));
+}
 
 }
