@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from '../../../application/controllers/auth/auth.controller';
 import { IniciarSesionUseCase } from '../../../application/logic/auth/iniciar-sesion.use-case';
+import { RefrescarTokenUseCase } from '../../../application/logic/auth/refrescar-token.use.case';
 import { AlumnoDatosAcademicosModule } from '../../modules/alumnos_datos_academicos.module';
 
 @Module({
@@ -13,17 +14,26 @@ import { AlumnoDatosAcademicosModule } from '../../modules/alumnos_datos_academi
       global: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expiresIn = configService.get<string>('JWT_ACCESS_EXPIRATION');
+        
+        if (!expiresIn) {
+          throw new Error('JWT_ACCESS_EXPIRATION no está definida en las variables de entorno');
+        }
+
+        return {
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: {
+            expiresIn: expiresIn as any, // Type assertion segura porque validamos que existe
+          },
+        };
+      },
     }),
   ],
 
   providers: [
-    IniciarSesionUseCase
+    IniciarSesionUseCase,
+    RefrescarTokenUseCase
   ],
 
   controllers: [
@@ -32,6 +42,7 @@ import { AlumnoDatosAcademicosModule } from '../../modules/alumnos_datos_academi
 
   exports: [
     IniciarSesionUseCase,
+    RefrescarTokenUseCase,
     JwtModule
   ],
 })

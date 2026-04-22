@@ -11,5 +11,5 @@ export class LoginAlumnoResponse {
   };
 
   access_token: string;
-
+  refresh_token: string; 
 }

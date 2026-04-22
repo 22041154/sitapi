@@ -6,8 +6,8 @@ export class LoginAlumnoPresenter {
   static Presentar(
     datos: DatosLoginAlumno,
     accessToken: string,
+    refreshToken: string, 
   ): LoginAlumnoResponse {
-
     const response = new LoginAlumnoResponse();
     response.type = 'alumnos';
     response.attributes = {
@@ -18,7 +18,7 @@ export class LoginAlumnoPresenter {
       semestre_activo: datos.SemestreActivo,
     };
     response.access_token = accessToken;
-
+    response.refresh_token = refreshToken; // NUEVO
     return response;
   }
 

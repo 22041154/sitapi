@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { IAlumnoDatosAcademicosRepository } from '../../../domain/interfaces/alumnos_datos_academicos.repository.interface';
 import { LoginAlumnoResponse } from '../../../dtos/responses/auth/login_alumno.response';
 import { LoginAlumnoPresenter } from '../../presenters/auth/login_alumno.presenter';
@@ -11,10 +12,10 @@ export class IniciarSesionUseCase {
     @Inject('IAlumnoDatosAcademicosRepository')
     private readonly alumnoRepository: IAlumnoDatosAcademicosRepository,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async Ejecutar(noControl: string, nip: string): Promise<LoginAlumnoResponse> {
-
     const alumno = await this.alumnoRepository.BuscarPorNoControl(noControl);
 
     if (!alumno) {
@@ -36,9 +37,19 @@ export class IniciarSesionUseCase {
       no_control: alumno.noControl,
     };
 
+    // Access token: usa la expiración configurada en JwtModule (JWT_EXPIRATION)
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return LoginAlumnoPresenter.Presentar(datosLogin, accessToken);
-  }
+    const refreshExpiration = this.configService.get<string>('JWT_REFRESH_EXPIRATION');
+    
+    if (!refreshExpiration) {
+      throw new UnauthorizedException('Configuración de refresh token no encontrada');
+    }
 
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: refreshExpiration as any,
+    });
+
+    return LoginAlumnoPresenter.Presentar(datosLogin, accessToken, refreshToken);
+  }
 }
