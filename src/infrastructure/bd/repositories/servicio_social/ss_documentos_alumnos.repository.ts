@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ISsDocumentosAlumnosRepository } from '../../../../domain/interfaces/servicio_social/ss_documentos_alumnos.interface';
 import { SsDocumentosAlumnosEntity } from '../../entities/servicio_social/ss_documentos_alumnos.entity';
 import { SsDocumentosAlumnosPoco } from '../../../../dtos/POCOS/servicio_social/ss_documentos_alumnos.poco';
 import { CrearSsDocumentosAlumnosDto } from '../../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
+import { ActualizarSsDocumentosAlumnosDto } from '../../../../dtos/requests/Servicio Social/DocumentosAlumnos/actualizar_ss_documentos_alumnos.dto';
 
 @Injectable()
 export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosRepository {
@@ -62,5 +63,44 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
   
   async Eliminar(id: number): Promise<void> {
     await this.documentosRepository.delete(id);
+  }
+
+  async Actualizar(
+      id: number, 
+      dto: ActualizarSsDocumentosAlumnosDto, 
+      archivos: any
+    ): Promise<SsDocumentosAlumnosPoco> {
+    const entity = await this.documentosRepository.findOne({
+      where: { id }
+    });
+
+    if (!entity) {
+      throw new NotFoundException(`No se encontró el registro de documentos con id ${id}`);
+    }
+
+    // Actualizar campos simples si vienen en el DTO
+    if (dto.id_alumno_academico !== undefined) {
+      entity.id_alumno_academico = Number(dto.id_alumno_academico);
+    }
+    if (dto.id_plan_trabajo !== undefined) {
+      entity.id_plan_trabajo = Number(dto.id_plan_trabajo);
+    }
+
+    // Actualizar archivos (solo los que vienen en la petición)
+    if (archivos?.carta_presentacion) {
+      entity.carta_presentacion = archivos.carta_presentacion[0].buffer;
+    }
+    if (archivos?.carta_compromiso) {
+      entity.carta_compromiso = archivos.carta_compromiso[0].buffer;
+    }
+    if (archivos?.carta_aceptacion) {
+      entity.carta_aceptacion = archivos.carta_aceptacion[0].buffer;
+    }
+    if (archivos?.seguro_facultativo) {
+      entity.seguro_facultativo = archivos.seguro_facultativo[0].buffer;
+    }
+
+    const entityActualizada = await this.documentosRepository.save(entity);
+    return this.mapToPoco(entityActualizada);
   }
 }

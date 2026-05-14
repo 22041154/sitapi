@@ -1,5 +1,6 @@
 import { SsDocumentosAlumnosPoco } from '../../../dtos/POCOS/servicio_social/ss_documentos_alumnos.poco';
 import { CrearSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
+import { ActualizarSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/actualizar_ss_documentos_alumnos.dto';
 
 export interface ISsDocumentosAlumnosRepository {
   ObtenerTodos(): Promise<SsDocumentosAlumnosPoco[]>;
@@ -8,4 +9,9 @@ export interface ISsDocumentosAlumnosRepository {
   ObtenerPorIdPlanTrabajo(id_plan_trabajo: number): Promise<SsDocumentosAlumnosPoco[]>;
   Crear(dto: CrearSsDocumentosAlumnosDto, archivos: any): Promise<SsDocumentosAlumnosPoco>;
   Eliminar(id: number): Promise<void>;
+  Actualizar(
+    id: number, 
+    dto: ActualizarSsDocumentosAlumnosDto, 
+    archivos: any
+  ): Promise<SsDocumentosAlumnosPoco>;
 }
