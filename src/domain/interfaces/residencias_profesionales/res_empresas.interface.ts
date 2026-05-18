@@ -10,5 +10,5 @@ export interface IResEmpresasRepository {
   Crear(dto: CrearResEmpresaDto): Promise<ResEmpresas>;
   Eliminar(id: number): Promise<void>;
   EliminarPorNombre(nombre: string): Promise<void>;
-  Actualizar(id: number, dto: ActualizarResEmpresaDto): Promise<ResEmpresas>;
+  //Actualizar(id: number, dto: ActualizarResEmpresaDto): Promise<ResEmpresas>;
 }

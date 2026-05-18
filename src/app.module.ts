@@ -22,6 +22,10 @@ import { SsPermisosModule } from './infrastructure/modules/servicio_social/ss_pe
 import { SsSeguimientoAlumnosModule } from './infrastructure/modules/servicio_social/ss_seguimiento_alumnos.module';
 import { SsRolesPermisosModule } from './infrastructure/modules/servicio_social/ss_roles_permisos.module';
 import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_social/ss_documentos_alumnos.module';
+
+//Modules relacionados a residencias profesionales
+import { ResEmpresasModule } from './infrastructure/modules/residencias_profesionales/res_empresas.moodule';
+
 @Module({
   imports: [
     // Configuración de variables de entorno
@@ -47,6 +51,7 @@ import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_soc
     SsSeguimientoAlumnosModule,
     SsRolesPermisosModule,
     SsDocumentosAlumnosModule,
+    ResEmpresasModule,
   ],
 
   controllers: [
