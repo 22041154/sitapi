@@ -6,6 +6,7 @@ import { ResEmpresasController } from '../../../application/controllers/residenc
 import { ObtenerResEmpresasUseCase } from '../../../application/logic/residencias_profesionales/Empresas/obtener_res_empresas.logic';
 import { CrearResEmpresasUseCase } from '../../../application/logic/residencias_profesionales/Empresas/crear_res_empresas.logic';
 import { EliminarResEmpresasUseCase } from '../../../application/logic/residencias_profesionales/Empresas/eliminar_res_empresas.logic';
+import { ActualizarResEmpresasUseCase } from '../../../application/logic/residencias_profesionales/Empresas/actualizar_res_empresas.logic';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EliminarResEmpresasUseCase } from '../../../application/logic/residenci
     CrearResEmpresasUseCase,
     ObtenerResEmpresasUseCase,
     EliminarResEmpresasUseCase,
+    ActualizarResEmpresasUseCase,
     {
       provide: 'IResEmpresasRepository',
       useClass: ResEmpresasRepository,
@@ -30,6 +32,7 @@ import { EliminarResEmpresasUseCase } from '../../../application/logic/residenci
     ObtenerResEmpresasUseCase,
     CrearResEmpresasUseCase,
     EliminarResEmpresasUseCase,
+    ActualizarResEmpresasUseCase,
   ],
 })
 export class ResEmpresasModule {}

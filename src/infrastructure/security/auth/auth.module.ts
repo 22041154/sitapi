@@ -16,7 +16,7 @@ import { AlumnoDatosAcademicosModule } from '../../modules/alumnos_datos_academi
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION') as any,
+          expiresIn: configService.get<string>('JWT_ACCESS_EXPIRATION') as any,
         },
       }),
     }),
