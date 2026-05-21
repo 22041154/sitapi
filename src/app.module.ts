@@ -26,6 +26,7 @@ import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_soc
 //Modules relacionados a residencias profesionales
 import { ResEmpresasModule } from './infrastructure/modules/residencias_profesionales/res_empresas.moodule';
 import { ResProyectosModule } from './infrastructure/modules/residencias_profesionales/res_proyectos.module';
+import { ResAsesorIntProyectosModule } from './infrastructure/modules/residencias_profesionales/res_asesor_int_proyecto.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ResProyectosModule } from './infrastructure/modules/residencias_profesi
 
     ResEmpresasModule,
     ResProyectosModule,
+    ResAsesorIntProyectosModule,
   ],
 
   controllers: [
