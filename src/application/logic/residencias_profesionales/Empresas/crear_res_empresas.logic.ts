@@ -1,4 +1,9 @@
-import { Injectable, Inject, ConflictException, } from '@nestjs/common';
+import {
+    Injectable,
+    Inject,
+    ConflictException,
+} from '@nestjs/common';
+
 import { IResEmpresasRepository } from '../../../../domain/interfaces/residencias_profesionales/res_empresas.interface';
 import { CrearResEmpresaDto } from '../../../../dtos/requests/Residencias Profesionales/res_empresas/crear_res_empresas.dto';
 import { ResEmpresas } from '../../../../dtos/POCOS/residencias_profesionales/res_empresas,poco';
@@ -6,34 +11,39 @@ import { ResEmpresas } from '../../../../dtos/POCOS/residencias_profesionales/re
 @Injectable()
 export class CrearResEmpresasUseCase {
 
-  constructor(
-    @Inject('IResEmpresasRepository')
-    private readonly resEmpresasRepository: IResEmpresasRepository,
-  ) {}
+    constructor(
+        @Inject('IResEmpresasRepository')
+        private readonly resEmpresasRepository:
+        IResEmpresasRepository,
+    ) {}
 
-  async Ejecutar(
-    dto: CrearResEmpresaDto,
-  ): Promise<ResEmpresas> {
+    async Ejecutar(
+        dto: CrearResEmpresaDto,
+    ): Promise<ResEmpresas> {
 
-    const empresasExistentes =
-      await this.resEmpresasRepository.ObtenerPorNombreEmpresa(
-        dto.nombre_empresa,
-      );
+        const empresasExistentes =
+            await this.resEmpresasRepository.ObtenerPorNombre(
+                dto.nombre,
+            );
 
-    const existeEmpresa = empresasExistentes.some(
-      (empresa) =>
-        empresa.nombreEmpresa.trim().toLowerCase() ===
-        dto.nombre_empresa.trim().toLowerCase(),
-    );
+        const existeEmpresa =
+            empresasExistentes.some(
+                (empresa) =>
+                    empresa.nombre.trim().toLowerCase() ===
+                    dto.nombre.trim().toLowerCase()
+                    &&
+                    (empresa.localizacion?.trim().toLowerCase() || '') ===
+                    (dto.localizacion?.trim().toLowerCase() || ''),
+            );
 
-    if (existeEmpresa) {
-      throw new ConflictException(
-        `Ya existe una empresa con el nombre ${dto.nombre_empresa}`,
-      );
+        if (existeEmpresa) {
+            throw new ConflictException(
+                `Ya existe una empresa con el nombre ${dto.nombre} en la misma localización`,
+            );
+        }
+
+        return this.resEmpresasRepository.Crear(dto);
+
     }
-
-    return this.resEmpresasRepository.Crear(dto);
-
-  }
 
 }

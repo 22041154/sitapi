@@ -3,12 +3,36 @@ import { CrearResEmpresaDto } from '../../../dtos/requests/Residencias Profesion
 import { ActualizarResEmpresaDto } from '../../../dtos/requests/Residencias Profesionales/res_empresas/actualizar_res_empresas.dto';
 
 export interface IResEmpresasRepository {
-  ObtenerTodos(): Promise<ResEmpresas[]>;
-  ObtenerPorId(id: number): Promise<ResEmpresas | null>;
-  ObtenerPorNombreEmpresa(nombre: string): Promise<ResEmpresas[]>;
-  ObtenerPorResponsable(responsable: string): Promise<ResEmpresas[]>;
-  Crear(dto: CrearResEmpresaDto): Promise<ResEmpresas>;
-  Eliminar(id: number): Promise<void>;
-  EliminarPorNombre(nombre: string): Promise<void>;
-  Actualizar(id: number, dto: ActualizarResEmpresaDto): Promise<ResEmpresas>;
+
+    ObtenerTodos(): Promise<ResEmpresas[]>;
+
+    ObtenerPorId(
+        id: number,
+    ): Promise<ResEmpresas | null>;
+
+    ObtenerPorNombre(
+        nombre: string,
+    ): Promise<ResEmpresas[]>;
+
+    ObtenerPorLocalizacion(
+        localizacion: string,
+    ): Promise<ResEmpresas[]>;
+
+    Crear(
+        dto: CrearResEmpresaDto,
+    ): Promise<ResEmpresas>;
+
+    Actualizar(
+        id: number,
+        dto: ActualizarResEmpresaDto,
+    ): Promise<ResEmpresas>;
+
+    Eliminar(
+        id: number,
+    ): Promise<void>;
+
+    EliminarPorNombre(
+        nombre: string,
+    ): Promise<void>;
+
 }

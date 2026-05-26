@@ -1,81 +1,89 @@
-import { Injectable, Inject, NotFoundException, } from '@nestjs/common';
+import {
+    Injectable,
+    Inject,
+    NotFoundException,
+} from '@nestjs/common';
+
 import { IResEmpresasRepository } from '../../../../domain/interfaces/residencias_profesionales/res_empresas.interface';
 import { ResEmpresas } from '../../../../dtos/POCOS/residencias_profesionales/res_empresas,poco';
 
 @Injectable()
 export class ObtenerResEmpresasUseCase {
 
-  constructor(
-    @Inject('IResEmpresasRepository')
-    private readonly resEmpresasRepository: IResEmpresasRepository,
-  ) {}
+    constructor(
+        @Inject('IResEmpresasRepository')
+        private readonly resEmpresasRepository:
+        IResEmpresasRepository,
+    ) {}
 
-  async ObtenerTodos(): Promise<ResEmpresas[]> {
+    async ObtenerTodos(): Promise<ResEmpresas[]> {
 
-    const empresas =
-      await this.resEmpresasRepository.ObtenerTodos();
+        const empresas =
+            await this.resEmpresasRepository.ObtenerTodos();
 
-    if (empresas.length === 0) {
-      throw new NotFoundException(
-        'No se encontraron empresas',
-      );
+        if (empresas.length === 0) {
+            throw new NotFoundException(
+                'No se encontraron empresas',
+            );
+        }
+
+        return empresas;
+
     }
 
-    return empresas;
+    async ObtenerPorId(
+        id: number,
+    ): Promise<ResEmpresas> {
 
-  }
+        const empresa =
+            await this.resEmpresasRepository.ObtenerPorId(id);
 
-  async ObtenerPorId(
-    id: number,
-  ): Promise<ResEmpresas> {
+        if (!empresa) {
+            throw new NotFoundException(
+                `No se encontró la empresa con id ${id}`,
+            );
+        }
 
-    const empresa =
-      await this.resEmpresasRepository.ObtenerPorId(id);
+        return empresa;
 
-    if (!empresa) {
-      throw new NotFoundException(
-        `No se encontró la empresa con id ${id}`,
-      );
     }
 
-    return empresa;
+    async ObtenerPorNombre(
+        nombre: string,
+    ): Promise<ResEmpresas[]> {
 
-  }
+        const empresas =
+            await this.resEmpresasRepository.ObtenerPorNombre(
+                nombre,
+            );
 
-  async ObtenerPorNombreEmpresa(
-    nombre: string,
-  ): Promise<ResEmpresas[]> {
+        if (empresas.length === 0) {
+            throw new NotFoundException(
+                `No se encontraron empresas con el nombre ${nombre}`,
+            );
+        }
 
-    const empresas =
-      await this.resEmpresasRepository.ObtenerPorNombreEmpresa(nombre);
+        return empresas;
 
-    if (empresas.length === 0) {
-      throw new NotFoundException(
-        `No se encontraron empresas con el nombre ${nombre}`,
-      );
     }
 
-    return empresas;
+    async ObtenerPorLocalizacion(
+        localizacion: string,
+    ): Promise<ResEmpresas[]> {
 
-  }
+        const empresas =
+            await this.resEmpresasRepository.ObtenerPorLocalizacion(
+                localizacion,
+            );
 
-  async ObtenerPorNombreResponsable(
-    nombreResponsable: string,
-  ): Promise<ResEmpresas[]> {
+        if (empresas.length === 0) {
+            throw new NotFoundException(
+                `No se encontraron empresas en la localización ${localizacion}`,
+            );
+        }
 
-    const empresas =
-      await this.resEmpresasRepository.ObtenerPorResponsable(
-        nombreResponsable,
-      );
+        return empresas;
 
-    if (empresas.length === 0) {
-      throw new NotFoundException(
-        `No se encontraron empresas con el responsable ${nombreResponsable}`,
-      );
     }
-
-    return empresas;
-
-  }
 
 }

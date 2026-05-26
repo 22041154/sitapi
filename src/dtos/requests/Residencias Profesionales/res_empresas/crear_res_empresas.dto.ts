@@ -1,61 +1,31 @@
-// crear-res-empresa.dto.ts
-
 import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  MaxLength,
+    IsString,
+    IsNotEmpty,
+    IsOptional,
+    MaxLength,
 } from 'class-validator';
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CrearResEmpresaDto {
 
-  @ApiProperty({
-    example: 'Tech Solutions SA de CV',
-    description: 'Nombre de la empresa',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(200)
-  nombre_empresa: string;
+    @ApiProperty({
+        example: 'Microsoft México',
+        description: 'Nombre de la empresa',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(200)
+    nombre: string;
 
-  @ApiProperty({
-    example: 'JUAN PEREZ LOPEZ',
-    description: 'Nombre del responsable',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  responsable: string;
-
-  @ApiProperty({
-    example: '6181234567',
-    description: 'Número telefónico de contacto',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(20)
-  telefono?: string;
-
-  @ApiProperty({
-    example: 'empresa@gmail.com',
-    description: 'Correo electrónico',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(100)
-  correo?: string;
-
-  @ApiProperty({
-    example: 'Durango, Dgo.',
-    description: 'Dirección o localización de la empresa',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(255)
-  localizacion?: string;
+    @ApiProperty({
+        example: 'Durango, Dgo.',
+        description: 'Localización de la empresa',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    @MaxLength(100)
+    localizacion?: string;
 
 }
