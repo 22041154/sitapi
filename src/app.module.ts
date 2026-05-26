@@ -28,6 +28,7 @@ import { ResEmpresasModule } from './infrastructure/modules/residencias_profesio
 import { ResProyectosModule } from './infrastructure/modules/residencias_profesionales/res_proyectos.module';
 import { ResAsesorIntProyectosModule } from './infrastructure/modules/residencias_profesionales/res_asesor_int_proyecto.module';
 import { ResCalificacionesModule } from './infrastructure/modules/residencias_profesionales/res_califiaciones.module';
+import { ResCatalogoDictamenModule } from './infrastructure/modules/residencias_profesionales/res_catalogos_dictamen.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ResCalificacionesModule } from './infrastructure/modules/residencias_pr
     ResProyectosModule,
     ResAsesorIntProyectosModule,
     ResCalificacionesModule,
+    ResCatalogoDictamenModule,
   ],
 
   controllers: [
