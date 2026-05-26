@@ -1,4 +1,5 @@
 import { ResProyectos } from '../../../dtos/POCOS/residencias_profesionales/res_proyectos.poco';
+
 import { ResProyectosResponse } from '../../../dtos/responses/residencias_profesionales/res_proyectos.response';
 
 export class ResProyectosPresenter {
@@ -7,17 +8,17 @@ export class ResProyectosPresenter {
         poco: ResProyectos,
     ): ResProyectosResponse {
 
-        const response = new ResProyectosResponse();
+        const response =
+            new ResProyectosResponse();
 
         response.id = poco.id;
         response.idEmpresa = poco.idEmpresa;
-        response.idCarrera = poco.idCarrera;
-        response.descripcion = poco.descripcion;
-        response.asesorExterno = poco.asesorExterno;
-        response.celular = poco.celular;
-        response.correo = poco.correo;
-        response.anteproyecto = poco.anteproyecto;
-        response.cartaAceptacion = poco.cartaAceptacion;
+        response.folio = poco.folio;
+        response.nombre = poco.nombre;
+        response.nombreAsesorExterno = poco.nombreAsesorExterno;
+        response.puestoAsesorExterno = poco.puestoAsesorExterno;
+        response.telefonoYExtension = poco.telefonoYExtension;
+        response.idClaveArea = poco.idClaveArea;
 
         return response;
 
@@ -28,7 +29,7 @@ export class ResProyectosPresenter {
     ): ResProyectosResponse[] {
 
         return pocos.map(
-            poco => this.Presentar(poco),
+            (poco) => this.Presentar(poco),
         );
 
     }

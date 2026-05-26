@@ -1,84 +1,71 @@
 import {
-  IsString,
-  IsOptional,
-  MaxLength,
-  IsNumber,
+    IsString,
+    IsNotEmpty,
+    IsNumber,
+    MaxLength,
 } from 'class-validator';
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CrearResProyectoDto {
 
-  @ApiProperty({
-    example: 1,
-    description: 'ID de la empresa',
-  })
-  @IsNumber()
-  id_empresa: number;
+    @ApiProperty({
+        example: 1,
+        description: 'ID de la empresa',
+    })
+    @IsNumber()
+    id_empresa: number;
 
-  @ApiProperty({
-    example: 3,
-    description: 'ID de la carrera',
-  })
-  @IsNumber()
-  id_carrera: number;
+    @ApiProperty({
+        example: 'RES-2026-001',
+        description: 'Folio del proyecto',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(20)
+    folio: string;
 
-  @ApiProperty({
-    example: 'Sistema de gestión para residencias profesionales',
-    description: 'Descripción del proyecto',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  descripcion?: string;
+    @ApiProperty({
+        example: 'Sistema de gestión de residencias',
+        description: 'Nombre del proyecto',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(200)
+    nombre: string;
 
-  @ApiProperty({
-    example: 'MARIA FERNANDA DIAZ',
-    description: 'Nombre del asesor externo',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(100)
-  asesor_externo?: string;
+    @ApiProperty({
+        example: 'JUAN PEREZ LOPEZ',
+        description: 'Nombre del asesor externo',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(200)
+    nombre_asesor_externo: string;
 
-  @ApiProperty({
-    example: '6189876543',
-    description: 'Número celular del asesor externo',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(20)
-  celular?: string;
+    @ApiProperty({
+        example: 'Gerente de TI',
+        description: 'Puesto del asesor externo',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(200)
+    puesto_asesor_externo: string;
 
-  @ApiProperty({
-    example: 'asesor@gmail.com',
-    description: 'Correo electrónico del asesor externo',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(100)
-  correo?: string;
+    @ApiProperty({
+        example: '6181234567 ext 102',
+        description: 'Teléfono y extensión del asesor externo',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(20)
+    telefono_y_extension: string;
 
-  @ApiProperty({
-    example: 'anteproyecto.pdf',
-    description: 'Nombre del archivo del anteproyecto',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(100)
-  anteproyecto?: string;
-
-  @ApiProperty({
-    example: 'carta_aceptacion.pdf',
-    description: 'Nombre del archivo de carta de aceptación',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(100)
-  carta_aceptacion?: string;
+    @ApiProperty({
+        example: 2,
+        description: 'Clave del área',
+    })
+    @IsNumber()
+    id_clave_area: number;
 
 }

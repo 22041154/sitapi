@@ -1,38 +1,57 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ResEmpresasEntity } from './res_empresas';
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 
-@Entity('res_proyectos', { schema: 'residencias' })
+@Entity('res_proyectos', {
+    schema: 'residencias',
+})
 export class ResProyectosEntity {
 
-  @PrimaryGeneratedColumn({ type: 'bigint' })
-  id: number;
+    @PrimaryGeneratedColumn({
+        type: 'bigint',
+    })
+    id: number;
 
-  @Column({ type: 'bigint' })
-  id_empresa: number;
+    @Column({
+        type: 'bigint',
+    })
+    id_empresa: number;
 
-  @Column({ type: 'bigint' })
-  id_carrera: number;
+    @Column({
+        type: 'varchar',
+        length: 20,
+    })
+    folio: string;
 
-  @Column({ type: 'text', nullable: true })
-  descripcion: string;
+    @Column({
+        type: 'varchar',
+        length: 200,
+    })
+    nombre: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  asesor_externo: string;
+    @Column({
+        type: 'varchar',
+        length: 200,
+    })
+    nombre_asesor_externo: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
-  celular: string;
+    @Column({
+        type: 'varchar',
+        length: 200,
+    })
+    puesto_asesor_externo: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  correo: string;
+    @Column({
+        type: 'varchar',
+        length: 20,
+    })
+    telefono_y_extension: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  anteproyecto: string;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  carta_aceptacion: string;
-
-  @ManyToOne(() => ResEmpresasEntity)
-  @JoinColumn({ name: 'id_empresa' })
-  empresa: ResEmpresasEntity;
+    @Column({
+        type: 'bigint',
+    })
+    id_clave_area: number;
 
 }

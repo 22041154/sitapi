@@ -1,14 +1,22 @@
 import { Injectable, NotFoundException, } from '@nestjs/common';
+
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { ILike, Repository, } from 'typeorm';
+
 import { ResProyectosEntity } from '../../entities/residencias_profesionales/res_proyectos';
+
 import { ResProyectos } from '../../../../dtos/POCOS/residencias_profesionales/res_proyectos.poco';
+
 import { IResProyectosRepository } from '../../../../domain/interfaces/residencias_profesionales/res_proyectos.interface';
+
 import { CrearResProyectoDto } from '../../../../dtos/requests/Residencias Profesionales/res_proyectos/crear_res_proyecto.dto';
+
 import { ActualizarResProyectoDto } from '../../../../dtos/requests/Residencias Profesionales/res_proyectos/actualizar_res_proyecto.dto';
 
 @Injectable()
-export class ResProyectosRepository implements IResProyectosRepository {
+export class ResProyectosRepository
+implements IResProyectosRepository {
 
     constructor(
         @InjectRepository(ResProyectosEntity)
@@ -23,13 +31,12 @@ export class ResProyectosRepository implements IResProyectosRepository {
         return new ResProyectos(
             entity.id,
             entity.id_empresa,
-            entity.id_carrera,
-            entity.descripcion,
-            entity.asesor_externo,
-            entity.celular,
-            entity.correo,
-            entity.anteproyecto,
-            entity.carta_aceptacion,
+            entity.folio,
+            entity.nombre,
+            entity.nombre_asesor_externo,
+            entity.puesto_asesor_externo,
+            entity.telefono_y_extension,
+            entity.id_clave_area,
         );
 
     }
@@ -37,12 +44,11 @@ export class ResProyectosRepository implements IResProyectosRepository {
     async ObtenerTodos(): Promise<ResProyectos[]> {
 
         const entities =
-            await this.resProyectosRepository.find({
-                relations: ['empresa'],
-            });
+            await this.resProyectosRepository.find();
 
         return entities.map(
-            (entity) => this.MapearEntidadADominio(entity),
+            (entity) =>
+                this.MapearEntidadADominio(entity),
         );
 
     }
@@ -54,7 +60,6 @@ export class ResProyectosRepository implements IResProyectosRepository {
         const entity =
             await this.resProyectosRepository.findOne({
                 where: { id },
-                relations: ['empresa'],
             });
 
         return entity
@@ -69,50 +74,85 @@ export class ResProyectosRepository implements IResProyectosRepository {
 
         const entities =
             await this.resProyectosRepository.find({
-                where: {
-                    id_empresa: idEmpresa,
-                },
-                relations: ['empresa'],
+                where: { id_empresa: idEmpresa },
             });
 
         return entities.map(
-            (entity) => this.MapearEntidadADominio(entity),
+            (entity) =>
+                this.MapearEntidadADominio(entity),
         );
 
     }
 
-    async ObtenerPorCarrera(
-        idCarrera: number,
+    async ObtenerPorFolio(
+        folio: string,
     ): Promise<ResProyectos[]> {
 
         const entities =
             await this.resProyectosRepository.find({
                 where: {
-                    id_carrera: idCarrera,
+                    folio: ILike(`%${folio}%`),
                 },
-                relations: ['empresa'],
             });
 
         return entities.map(
-            (entity) => this.MapearEntidadADominio(entity),
+            (entity) =>
+                this.MapearEntidadADominio(entity),
         );
 
     }
 
-    async ObtenerPorAsesorExterno(
-        asesorExterno: string,
+    async ObtenerPorNombre(
+        nombre: string,
     ): Promise<ResProyectos[]> {
 
         const entities =
             await this.resProyectosRepository.find({
                 where: {
-                    asesor_externo: ILike(`%${asesorExterno}%`),
+                    nombre: ILike(`%${nombre}%`),
                 },
-                relations: ['empresa'],
             });
 
         return entities.map(
-            (entity) => this.MapearEntidadADominio(entity),
+            (entity) =>
+                this.MapearEntidadADominio(entity),
+        );
+
+    }
+
+    async ObtenerPorNombreAsesorExterno(
+        nombreAsesorExterno: string,
+    ): Promise<ResProyectos[]> {
+
+        const entities =
+            await this.resProyectosRepository.find({
+                where: {
+                    nombre_asesor_externo:
+                        ILike(`%${nombreAsesorExterno}%`),
+                },
+            });
+
+        return entities.map(
+            (entity) =>
+                this.MapearEntidadADominio(entity),
+        );
+
+    }
+
+    async ObtenerPorIdClaveArea(
+        idClaveArea: number,
+    ): Promise<ResProyectos[]> {
+
+        const entities =
+            await this.resProyectosRepository.find({
+                where: {
+                    id_clave_area: idClaveArea,
+                },
+            });
+
+        return entities.map(
+            (entity) =>
+                this.MapearEntidadADominio(entity),
         );
 
     }
@@ -125,13 +165,15 @@ export class ResProyectosRepository implements IResProyectosRepository {
             this.resProyectosRepository.create({
 
                 id_empresa: dto.id_empresa,
-                id_carrera: dto.id_carrera,
-                descripcion: dto.descripcion,
-                asesor_externo: dto.asesor_externo,
-                celular: dto.celular,
-                correo: dto.correo,
-                anteproyecto: dto.anteproyecto,
-                carta_aceptacion: dto.carta_aceptacion,
+                folio: dto.folio,
+                nombre: dto.nombre,
+                nombre_asesor_externo:
+                    dto.nombre_asesor_externo,
+                puesto_asesor_externo:
+                    dto.puesto_asesor_externo,
+                telefono_y_extension:
+                    dto.telefono_y_extension,
+                id_clave_area: dto.id_clave_area,
 
             });
 
@@ -160,9 +202,7 @@ export class ResProyectosRepository implements IResProyectosRepository {
             );
         }
 
-        Object.assign(entity, {
-            ...dto,
-        });
+        Object.assign(entity, dto);
 
         const entityActualizada =
             await this.resProyectosRepository.save(entity);

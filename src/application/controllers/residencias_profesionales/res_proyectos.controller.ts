@@ -1,12 +1,41 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, UseGuards, HttpCode, HttpStatus, } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody, } from '@nestjs/swagger';
+import {
+    Controller,
+    Get,
+    Post,
+    Put,
+    Patch,
+    Delete,
+    Param,
+    Body,
+    ParseIntPipe,
+    UseGuards,
+    HttpCode,
+    HttpStatus,
+} from '@nestjs/common';
+
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiBearerAuth,
+    ApiParam,
+    ApiBody,
+} from '@nestjs/swagger';
+
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
+
 import { ObtenerResProyectosUseCase } from '../../logic/residencias_profesionales/Proyectos/obtener_res_proyectos.use.case';
+
 import { CrearResProyectosUseCase } from '../../logic/residencias_profesionales/Proyectos/crear_res_proyectos.use.case';
+
 import { ActualizarResProyectosUseCase } from '../../logic/residencias_profesionales/Proyectos/actualizar_res_empresas.use.case';
+
 import { EliminarResProyectosUseCase } from '../../logic/residencias_profesionales/Proyectos/eliminar_res_proyectos.use.case';
+
 import { CrearResProyectoDto } from '../../../dtos/requests/Residencias Profesionales/res_proyectos/crear_res_proyecto.dto';
+
 import { ActualizarResProyectoDto } from '../../../dtos/requests/Residencias Profesionales/res_proyectos/actualizar_res_proyecto.dto';
+
 import { ResProyectosPresenter } from '../../presenters/residencias_profesionales/res_proyectos.presenter';
 
 @ApiTags('Residencias Profesionales - Proyectos')
@@ -16,34 +45,32 @@ import { ResProyectosPresenter } from '../../presenters/residencias_profesionale
 export class ResProyectosController {
 
     constructor(
-        private readonly obtenerResProyectosUseCase: ObtenerResProyectosUseCase,
-        private readonly crearResProyectosUseCase: CrearResProyectosUseCase,
-        private readonly actualizarResProyectosUseCase: ActualizarResProyectosUseCase,
-        private readonly eliminarResProyectosUseCase: EliminarResProyectosUseCase,
+        private readonly obtenerResProyectosUseCase:
+        ObtenerResProyectosUseCase,
+
+        private readonly crearResProyectosUseCase:
+        CrearResProyectosUseCase,
+
+        private readonly actualizarResProyectosUseCase:
+        ActualizarResProyectosUseCase,
+
+        private readonly eliminarResProyectosUseCase:
+        EliminarResProyectosUseCase,
     ) {}
 
     @Get()
     @ApiOperation({ summary: 'Obtener todos los proyectos' })
-    @ApiResponse({ status: 200, description: 'Lista de proyectos obtenida correctamente' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'No se encontraron proyectos' })
     async ObtenerTodos() {
 
         const proyectos =
             await this.obtenerResProyectosUseCase.ObtenerTodos();
 
-        return ResProyectosPresenter.PresentarLista(
-            proyectos,
-        );
+        return ResProyectosPresenter.PresentarLista(proyectos);
 
     }
 
     @Get('id/:id')
     @ApiOperation({ summary: 'Obtener proyecto por id' })
-    @ApiParam({ name: 'id', type: Number, description: 'Id del proyecto' })
-    @ApiResponse({ status: 200, description: 'Proyecto encontrado correctamente' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'Proyecto no encontrado' })
     async ObtenerPorId(
         @Param('id', ParseIntPipe) id: number,
     ) {
@@ -51,83 +78,83 @@ export class ResProyectosController {
         const proyecto =
             await this.obtenerResProyectosUseCase.ObtenerPorId(id);
 
-        return ResProyectosPresenter.Presentar(
-            proyecto,
-        );
+        return ResProyectosPresenter.Presentar(proyecto);
 
     }
 
     @Get('empresa/:idEmpresa')
     @ApiOperation({ summary: 'Obtener proyectos por empresa' })
-    @ApiParam({ name: 'idEmpresa', type: Number, description: 'Id de la empresa' })
-    @ApiResponse({ status: 200, description: 'Proyectos encontrados correctamente' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'No se encontraron proyectos para la empresa' })
     async ObtenerPorEmpresa(
         @Param('idEmpresa', ParseIntPipe) idEmpresa: number,
     ) {
 
         const proyectos =
-            await this.obtenerResProyectosUseCase.ObtenerPorEmpresa(
-                idEmpresa,
-            );
+            await this.obtenerResProyectosUseCase
+                .ObtenerPorEmpresa(idEmpresa);
 
-        return ResProyectosPresenter.PresentarLista(
-            proyectos,
-        );
+        return ResProyectosPresenter.PresentarLista(proyectos);
 
     }
 
-    @Get('carrera/:idCarrera')
-    @ApiOperation({ summary: 'Obtener proyectos por carrera' })
-    @ApiParam({ name: 'idCarrera', type: Number, description: 'Id de la carrera' })
-    @ApiResponse({ status: 200, description: 'Proyectos encontrados correctamente' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'No se encontraron proyectos para la carrera' })
-    async ObtenerPorCarrera(
-        @Param('idCarrera', ParseIntPipe) idCarrera: number,
+    @Get('folio/:folio')
+    @ApiOperation({ summary: 'Obtener proyectos por folio' })
+    async ObtenerPorFolio(
+        @Param('folio') folio: string,
     ) {
 
         const proyectos =
-            await this.obtenerResProyectosUseCase.ObtenerPorCarrera(
-                idCarrera,
-            );
+            await this.obtenerResProyectosUseCase
+                .ObtenerPorFolio(folio);
 
-        return ResProyectosPresenter.PresentarLista(
-            proyectos,
-        );
+        return ResProyectosPresenter.PresentarLista(proyectos);
 
     }
 
-    @Get('asesor-externo/:asesorExterno')
+    @Get('nombre/:nombre')
+    @ApiOperation({ summary: 'Obtener proyectos por nombre' })
+    async ObtenerPorNombre(
+        @Param('nombre') nombre: string,
+    ) {
+
+        const proyectos =
+            await this.obtenerResProyectosUseCase
+                .ObtenerPorNombre(nombre);
+
+        return ResProyectosPresenter.PresentarLista(proyectos);
+
+    }
+
+    @Get('asesor/:nombreAsesor')
     @ApiOperation({ summary: 'Obtener proyectos por asesor externo' })
-    @ApiParam({ name: 'asesorExterno', type: String, description: 'Nombre del asesor externo' })
-    @ApiResponse({ status: 200, description: 'Proyectos encontrados correctamente' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'No se encontraron proyectos para el asesor externo' })
-    async ObtenerPorAsesorExterno(
-        @Param('asesorExterno') asesorExterno: string,
+    async ObtenerPorAsesor(
+        @Param('nombreAsesor') nombreAsesor: string,
     ) {
 
         const proyectos =
-            await this.obtenerResProyectosUseCase.ObtenerPorAsesorExterno(
-                asesorExterno,
-            );
+            await this.obtenerResProyectosUseCase
+                .ObtenerPorNombreAsesorExterno(nombreAsesor);
 
-        return ResProyectosPresenter.PresentarLista(
-            proyectos,
-        );
+        return ResProyectosPresenter.PresentarLista(proyectos);
+
+    }
+
+    @Get('area/:idClaveArea')
+    @ApiOperation({ summary: 'Obtener proyectos por clave de área' })
+    async ObtenerPorArea(
+        @Param('idClaveArea', ParseIntPipe) idClaveArea: number,
+    ) {
+
+        const proyectos =
+            await this.obtenerResProyectosUseCase
+                .ObtenerPorIdClaveArea(idClaveArea);
+
+        return ResProyectosPresenter.PresentarLista(proyectos);
 
     }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ summary: 'Crear un nuevo proyecto' })
-    @ApiBody({ type: CrearResProyectoDto })
-    @ApiResponse({ status: 201, description: 'Proyecto creado correctamente' })
-    @ApiResponse({ status: 400, description: 'Datos inválidos' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 409, description: 'Ya existe un proyecto similar' })
+    @ApiOperation({ summary: 'Crear proyecto' })
     async Crear(
         @Body() dto: CrearResProyectoDto,
     ) {
@@ -135,46 +162,42 @@ export class ResProyectosController {
         const proyecto =
             await this.crearResProyectosUseCase.Ejecutar(dto);
 
-        return ResProyectosPresenter.Presentar(
-            proyecto,
-        );
+        return ResProyectosPresenter.Presentar(proyecto);
 
     }
 
     @Put('id/:id')
-    @ApiOperation({ summary: 'Actualizar proyecto' })
-    @ApiParam({ name: 'id', type: Number, description: 'Id del proyecto' })
-    @ApiBody({ type: ActualizarResProyectoDto })
-    @ApiResponse({ status: 200, description: 'Proyecto actualizado correctamente' })
-    @ApiResponse({ status: 400, description: 'Datos inválidos' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'Proyecto no encontrado' })
-    @ApiResponse({ status: 409, description: 'Ya existe un proyecto similar' })
-    async Actualizar(
+    @ApiOperation({ summary: 'Actualizar proyecto (PUT)' })
+    async ActualizarPut(
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: ActualizarResProyectoDto,
     ) {
 
         const proyecto =
-            await this.actualizarResProyectosUseCase.Ejecutar(
-                id,
-                dto,
-            );
+            await this.actualizarResProyectosUseCase.Ejecutar(id, dto);
 
-        return ResProyectosPresenter.Presentar(
-            proyecto,
-        );
+        return ResProyectosPresenter.Presentar(proyecto);
+
+    }
+
+    @Patch('id/:id')
+    @ApiOperation({ summary: 'Actualizar proyecto (PATCH)' })
+    async ActualizarPatch(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: ActualizarResProyectoDto,
+    ) {
+
+        const proyecto =
+            await this.actualizarResProyectosUseCase.Ejecutar(id, dto);
+
+        return ResProyectosPresenter.Presentar(proyecto);
 
     }
 
     @Delete('id/:id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({ summary: 'Eliminar proyecto por id' })
-    @ApiParam({ name: 'id', type: Number, description: 'Id del proyecto' })
-    @ApiResponse({ status: 204, description: 'Proyecto eliminado correctamente' })
-    @ApiResponse({ status: 401, description: 'No autorizado' })
-    @ApiResponse({ status: 404, description: 'Proyecto no encontrado' })
-    async EliminarPorId(
+    async Eliminar(
         @Param('id', ParseIntPipe) id: number,
     ) {
 
