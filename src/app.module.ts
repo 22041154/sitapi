@@ -29,6 +29,7 @@ import { ResProyectosModule } from './infrastructure/modules/residencias_profesi
 import { ResCalificacionesModule } from './infrastructure/modules/residencias_profesionales/res_califiaciones.module';
 import { ResCatalogoDictamenModule } from './infrastructure/modules/residencias_profesionales/res_catalogos_dictamen.module';
 import { ResAlumnosProyectosModule } from './infrastructure/modules/residencias_profesionales/res_alumnos_proyectos.module';
+import { ResSeguimientosModule } from './infrastructure/modules/residencias_profesionales/res_seguimientos.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ResAlumnosProyectosModule } from './infrastructure/modules/residencias_
     ResCalificacionesModule,
     ResCatalogoDictamenModule,
     ResAlumnosProyectosModule,
+    ResSeguimientosModule,
   ],
 
   controllers: [
