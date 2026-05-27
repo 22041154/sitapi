@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  garage:
+    image: dxflrs/garage:v1.0.0
+    container_name: garage_storage
+    ports:
+      - "3900:3900"
+      - "3901:3901"
+    volumes:
+      - ./garage/data:/var/lib/garage/data      # ← carpeta data que creaste
+      - ./garage/meta:/var/lib/garage/meta      # ← carpeta meta que creaste
+      - ./garage/garage.toml:/etc/garage.toml   # ← archivo toml que creaste
+    restart: unless-stopped
