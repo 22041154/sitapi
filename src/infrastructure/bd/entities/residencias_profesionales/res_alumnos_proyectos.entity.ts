@@ -1,36 +1,48 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+} from 'typeorm';
 
-@Entity('res_alumnos_proyectos', { schema: 'residencias' })
-export class ResAlumnosProyectosEntity {
+@Entity({
+    schema: 'residencias',
+    name: 'res_alumno_proyecto',
+})
+export class ResAlumnoProyectoEntity {
 
-  @PrimaryGeneratedColumn({ type: 'bigint' })
-  id: number;
+    @PrimaryGeneratedColumn({
+        type: 'bigint',
+    })
+    id: number;
 
-  @Column({ type: 'bigint' })
-  id_alumno_academico: number;
+    @Column({
+        type: 'bigint',
+    })
+    id_proyecto: number;
 
-  @Column({ type: 'bigint' })
-  id_proyecto: number;
+    @Column({
+        type: 'bigint',
+    })
+    id_alumno_academico: number;
 
-  @Column({ type: 'varchar', length: 200 })
-  nombre_proyecto: string;
+    @Column({
+        type: 'bigint',
+    })
+    id_asesor_interno: number;
 
-  @Column({ type: 'varchar', length: 100 })
-  asesor_interno: string;
+    @Column({
+        type: 'bigint',
+    })
+    id_catalogo_dictamen: number;
 
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  proyecto: string;
+    @Column({
+        type: 'bigint',
+    })
+    id_periodo_escolar: number;
 
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  seguimiento1: string;
-
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  seguimiento2: string;
-
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  seguimiento3: string;
-
-  @Column({ type: 'integer', nullable: true })
-  calificacion: number;
+    @Column({
+        type: 'bigint',
+    })
+    id_revisor: number;
 
 }
