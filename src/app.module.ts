@@ -7,7 +7,7 @@ import {
 
 import { ConfigModule } from '@nestjs/config';
 
-// Módulos
+// Módulos para inicios de seion
 import { BdModule } from './infrastructure/modules/bd.module';
 import { AuthModule } from './infrastructure/security/auth/auth.module';
 import { AlumnoDatosAcademicosModule } from './infrastructure/modules/alumnos_datos_academicos.module';
@@ -22,9 +22,18 @@ import { SsPermisosModule } from './infrastructure/modules/servicio_social/ss_pe
 import { SsSeguimientoAlumnosModule } from './infrastructure/modules/servicio_social/ss_seguimiento_alumnos.module';
 import { SsRolesPermisosModule } from './infrastructure/modules/servicio_social/ss_roles_permisos.module';
 import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_social/ss_documentos_alumnos.module';
+
+//Modules relacionados a residencias profesionales
+import { ResEmpresasModule } from './infrastructure/modules/residencias_profesionales/res_empresas.moodule';
+import { ResProyectosModule } from './infrastructure/modules/residencias_profesionales/res_proyectos.module';
+import { ResCalificacionesModule } from './infrastructure/modules/residencias_profesionales/res_califiaciones.module';
+import { ResCatalogoDictamenModule } from './infrastructure/modules/residencias_profesionales/res_catalogos_dictamen.module';
+import { ResAlumnosProyectosModule } from './infrastructure/modules/residencias_profesionales/res_alumnos_proyectos.module';
+import { ResSeguimientosModule } from './infrastructure/modules/residencias_profesionales/res_seguimientos.module';
+
 @Module({
   imports: [
-    // Configuración global de variables de entorno
+    // Configuración de variables de entorno
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -47,6 +56,13 @@ import { SsDocumentosAlumnosModule } from './infrastructure/modules/servicio_soc
     SsSeguimientoAlumnosModule,
     SsRolesPermisosModule,
     SsDocumentosAlumnosModule,
+
+    ResEmpresasModule,
+    ResProyectosModule,
+    ResCalificacionesModule,
+    ResCatalogoDictamenModule,
+    ResAlumnosProyectosModule,
+    ResSeguimientosModule,
   ],
 
   controllers: [

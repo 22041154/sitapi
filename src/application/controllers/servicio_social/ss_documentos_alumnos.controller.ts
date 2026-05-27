@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Delete, Body, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, HttpCode, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Put, Body, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFiles, HttpCode, HttpStatus, Res } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Multer } from 'multer';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { ObtenerSsDocumentosAlumnos } from '../../logic/servicio_Social/DocumentosAlumnos/obtener_ss_documentos_alumnos';
@@ -7,6 +8,9 @@ import { CrearSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/Doc
 import { CrearSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
 import { Response } from 'express';
 import { EliminarSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/DocumentosAlumnos/eliminar_ss_documentos_alumnos';
+import { ActualizarSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/DocumentosAlumnos/actualizar_ss_documentos_alumnos.use.case';
+import { ActualizarSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/actualizar_ss_documentos_alumnos.dto';
+import { SsDocumentosAlumnosPresenter } from '../../presenters/servicio_social/ss_documentos_alumnos.presenter';
 
 @ApiTags('Servicio Social - Documentos Alumnos')
 @ApiBearerAuth('access-token')
@@ -17,6 +21,7 @@ export class SsDocumentosAlumnosController {
     private readonly obtenerSsDocumentosAlumnosUseCase: ObtenerSsDocumentosAlumnos,
     private readonly crearSsDocumentosAlumnosUseCase: CrearSsDocumentosAlumnosUseCase,
     private readonly eliminarSsDocumentosAlumnosUseCase: EliminarSsDocumentosAlumnosUseCase,
+    private readonly actualizarSsDocumentosAlumnosUseCase: ActualizarSsDocumentosAlumnosUseCase,
   ) {}
 
   @Get()
@@ -139,7 +144,7 @@ export class SsDocumentosAlumnosController {
   ]))
   async Crear(
     @Body() dto: CrearSsDocumentosAlumnosDto,
-    @UploadedFiles() files: { 
+    @UploadedFiles() files:  { 
       carta_presentacion?: Express.Multer.File[], 
       carta_compromiso?: Express.Multer.File[],
       carta_aceptacion?: Express.Multer.File[],
@@ -160,5 +165,35 @@ export class SsDocumentosAlumnosController {
       statusCode: 200,
       message: `El registro de documentos con id ${id} fue eliminado correctamente.` 
     };
+  }
+
+  @Put('id/:id')
+  @ApiOperation({ summary: 'Actualizar documentos de un alumno' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', type: Number, description: 'ID del registro a actualizar' })
+  @ApiResponse({ status: 200, description: 'Documentos actualizados correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Registro no encontrado' })
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'carta_presentacion', maxCount: 1 },
+    { name: 'carta_compromiso', maxCount: 1 },
+    { name: 'carta_aceptacion', maxCount: 1 },
+    { name: 'seguro_facultativo', maxCount: 1 },
+  ]))
+  async Actualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ActualizarSsDocumentosAlumnosDto,
+    @UploadedFiles() files: {
+      carta_presentacion?: Express.Multer.File[],
+      carta_compromiso?: Express.Multer.File[],
+      carta_aceptacion?: Express.Multer.File[],
+      seguro_facultativo?: Express.Multer.File[]
+    }
+  ) {
+    const poco = await this.actualizarSsDocumentosAlumnosUseCase.Ejecutar(id, dto, files);
+  
+    // Si quieres usar el presenter (para convertir buffers a base64)
+    return SsDocumentosAlumnosPresenter.Presentar(poco);
   }
 }
