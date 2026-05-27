@@ -7,6 +7,8 @@
     "start:prod": "node dist/main"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1055.0",
+    "@aws-sdk/s3-request-presigner": "^3.1055.0",
     "@nestjs/common": "^11.1.13",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.13",
@@ -26,12 +28,14 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.16",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.2.3",
-    "@types/passport-jwt": "^4.0.1"
+    "@types/passport-jwt": "^4.0.1",
+    "@types/uuid": "^10.0.0"
   }
 }
