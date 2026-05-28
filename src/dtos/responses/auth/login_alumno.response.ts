@@ -10,6 +10,12 @@ export class LoginAlumnoResponse {
     semestre_activo: boolean;
   };
 
+  roles: string[];
+
+  permisos: string[];
+
   access_token: string;
-  refresh_token: string; 
+
+  refresh_token: string;
+
 }

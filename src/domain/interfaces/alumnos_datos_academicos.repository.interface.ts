@@ -3,8 +3,19 @@ import { DatosLoginAlumno } from '../../dtos/POCOS/datos_logfn_alumno.poco';
 
 export interface IAlumnoDatosAcademicosRepository {
 
-  BuscarPorNoControl(noControl: string): Promise<AlumnoDatosAcademicos | null>;
+  BuscarPorNoControl(
+    noControl: string
+  ): Promise<AlumnoDatosAcademicos | null>;
 
-  ObtenerDatosLoginPorNoControl(noControl: string): Promise<DatosLoginAlumno | null>;
+  ObtenerDatosLoginPorNoControl(
+    noControl: string
+  ): Promise<DatosLoginAlumno | null>;
+
+  ObtenerRolesYPermisos(
+    noControl: string
+  ): Promise<{
+    roles: string[];
+    permisos: string[];
+  }>;
 
 }

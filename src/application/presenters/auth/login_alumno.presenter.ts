@@ -6,10 +6,15 @@ export class LoginAlumnoPresenter {
   static Presentar(
     datos: DatosLoginAlumno,
     accessToken: string,
-    refreshToken: string, 
+    refreshToken: string,
+    roles: string[],
+    permisos: string[],
   ): LoginAlumnoResponse {
+
     const response = new LoginAlumnoResponse();
+
     response.type = 'alumnos';
+
     response.attributes = {
       nombre: datos.nombreCompleto,
       matricula: datos.matricula,
@@ -17,8 +22,15 @@ export class LoginAlumnoPresenter {
       carrera: datos.carrera,
       semestre_activo: datos.SemestreActivo,
     };
+
+    response.roles = roles;
+
+    response.permisos = permisos;
+
     response.access_token = accessToken;
-    response.refresh_token = refreshToken; // NUEVO
+
+    response.refresh_token = refreshToken;
+
     return response;
   }
 
