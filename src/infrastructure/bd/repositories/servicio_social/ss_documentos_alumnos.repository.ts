@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ISsDocumentosAlumnosRepository } from '../../../../domain/interfaces/servicio_social/ss_documentos_alumnos.interface';
+import {
+  ISsDocumentosAlumnosRepository,
+  DocumentosPaths,
+} from '../../../../domain/interfaces/servicio_social/ss_documentos_alumnos.interface';
 import { SsDocumentosAlumnosEntity } from '../../entities/servicio_social/ss_documentos_alumnos.entity';
 import { SsDocumentosAlumnosPoco } from '../../../../dtos/POCOS/servicio_social/ss_documentos_alumnos.poco';
 import { CrearSsDocumentosAlumnosDto } from '../../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
@@ -14,19 +17,20 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
     private readonly documentosRepository: Repository<SsDocumentosAlumnosEntity>,
   ) {}
 
+  // ─── MAPPER ──────────────────────────────────────────────────────────────
   private mapToPoco(entidad: SsDocumentosAlumnosEntity): SsDocumentosAlumnosPoco {
-    const poco = new SsDocumentosAlumnosPoco(
+    return new SsDocumentosAlumnosPoco(
       Number(entidad.id),
       Number(entidad.id_alumno_academico),
       Number(entidad.id_plan_trabajo),
       entidad.carta_presentacion,
       entidad.carta_compromiso,
       entidad.carta_aceptacion,
-      entidad.seguro_facultativo
+      entidad.seguro_facultativo,
     );
-    return poco;
   }
 
+  // ─── QUERIES ─────────────────────────────────────────────────────────────
   async ObtenerTodos(): Promise<SsDocumentosAlumnosPoco[]> {
     const entidades = await this.documentosRepository.find();
     return entidades.map(e => this.mapToPoco(e));
@@ -47,38 +51,52 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
     return entidades.map(e => this.mapToPoco(e));
   }
 
-  async Crear(dto: CrearSsDocumentosAlumnosDto, archivos: any): Promise<SsDocumentosAlumnosPoco> {
+  // ─── Obtiene solo los paths (usado por la logic para ir a Garage) ────────
+  async ObtenerPathsPorId(id: number): Promise<DocumentosPaths | null> {
+    const entidad = await this.documentosRepository.findOne({ where: { id } });
+    if (!entidad) return null;
+
+    return {
+      carta_presentacion: entidad.carta_presentacion,
+      carta_compromiso:   entidad.carta_compromiso,
+      carta_aceptacion:   entidad.carta_aceptacion,
+      seguro_facultativo: entidad.seguro_facultativo,
+    };
+  }
+
+  // ─── COMMANDS ────────────────────────────────────────────────────────────
+  async Crear(
+    dto: CrearSsDocumentosAlumnosDto,
+    paths: DocumentosPaths,
+  ): Promise<SsDocumentosAlumnosPoco> {
     const entity = this.documentosRepository.create({
       id_alumno_academico: Number(dto.id_alumno_academico),
-      id_plan_trabajo: Number(dto.id_plan_trabajo),
-      carta_presentacion: archivos?.carta_presentacion ? archivos.carta_presentacion[0].buffer : null,
-      carta_compromiso: archivos?.carta_compromiso ? archivos.carta_compromiso[0].buffer : null,
-      carta_aceptacion: archivos?.carta_aceptacion ? archivos.carta_aceptacion[0].buffer : null,
-      seguro_facultativo: archivos?.seguro_facultativo ? archivos.seguro_facultativo[0].buffer : null,
+      id_plan_trabajo:     Number(dto.id_plan_trabajo),
+      carta_presentacion:  paths.carta_presentacion  ?? null,
+      carta_compromiso:    paths.carta_compromiso    ?? null,
+      carta_aceptacion:    paths.carta_aceptacion    ?? null,
+      seguro_facultativo:  paths.seguro_facultativo  ?? null,
     });
-    
+
     const entityGuardada = await this.documentosRepository.save(entity);
     return this.mapToPoco(entityGuardada);
   }
-  
+
   async Eliminar(id: number): Promise<void> {
     await this.documentosRepository.delete(id);
   }
 
   async Actualizar(
-      id: number, 
-      dto: ActualizarSsDocumentosAlumnosDto, 
-      archivos: any
-    ): Promise<SsDocumentosAlumnosPoco> {
-    const entity = await this.documentosRepository.findOne({
-      where: { id }
-    });
+    id: number,
+    dto: ActualizarSsDocumentosAlumnosDto,
+    paths: Partial<DocumentosPaths>,
+  ): Promise<SsDocumentosAlumnosPoco> {
+    const entity = await this.documentosRepository.findOne({ where: { id } });
 
     if (!entity) {
       throw new NotFoundException(`No se encontró el registro de documentos con id ${id}`);
     }
 
-    // Actualizar campos simples si vienen en el DTO
     if (dto.id_alumno_academico !== undefined) {
       entity.id_alumno_academico = Number(dto.id_alumno_academico);
     }
@@ -86,18 +104,18 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
       entity.id_plan_trabajo = Number(dto.id_plan_trabajo);
     }
 
-    // Actualizar archivos (solo los que vienen en la petición)
-    if (archivos?.carta_presentacion) {
-      entity.carta_presentacion = archivos.carta_presentacion[0].buffer;
+    // Solo actualiza el path si llegó un archivo nuevo para ese documento
+    if (paths.carta_presentacion !== undefined) {
+      entity.carta_presentacion = paths.carta_presentacion;
     }
-    if (archivos?.carta_compromiso) {
-      entity.carta_compromiso = archivos.carta_compromiso[0].buffer;
+    if (paths.carta_compromiso !== undefined) {
+      entity.carta_compromiso = paths.carta_compromiso;
     }
-    if (archivos?.carta_aceptacion) {
-      entity.carta_aceptacion = archivos.carta_aceptacion[0].buffer;
+    if (paths.carta_aceptacion !== undefined) {
+      entity.carta_aceptacion = paths.carta_aceptacion;
     }
-    if (archivos?.seguro_facultativo) {
-      entity.seguro_facultativo = archivos.seguro_facultativo[0].buffer;
+    if (paths.seguro_facultativo !== undefined) {
+      entity.seguro_facultativo = paths.seguro_facultativo;
     }
 
     const entityActualizada = await this.documentosRepository.save(entity);

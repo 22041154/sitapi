@@ -11,15 +11,15 @@ export class SsDocumentosAlumnosEntity {
   @Column({ type: 'bigint', name: 'id_plan_trabajo' })
   id_plan_trabajo: number;
 
-  @Column({ type: 'bytea', nullable: true })
-  carta_presentacion: Buffer;
+  @Column({ type: 'text', nullable: true })
+  carta_presentacion: string;
 
-  @Column({ type: 'bytea', nullable: true })
-  carta_compromiso: Buffer;
+  @Column({ type: 'text', nullable: true })
+  carta_compromiso: string;
 
-  @Column({ type: 'bytea', nullable: true })
-  carta_aceptacion: Buffer;
+  @Column({ type: 'text', nullable: true })
+  carta_aceptacion: string;
 
-  @Column({ type: 'bytea', nullable: true })
-  seguro_facultativo: Buffer;
+  @Column({ type: 'text', nullable: true })
+  seguro_facultativo: string;
 }
