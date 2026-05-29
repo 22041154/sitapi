@@ -1,8 +1,10 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ISsDocumentosAlumnosRepository } from '../../../../domain/interfaces/servicio_social/ss_documentos_alumnos.interface';
 import { IStorageService, STORAGE_SERVICE } from '../../../../domain/interfaces/storage.interface';
 import { CrearSsDocumentosAlumnosDto } from '../../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
 import { SsDocumentosAlumnosPoco } from '../../../../dtos/POCOS/servicio_social/ss_documentos_alumnos.poco';
+import { PeriodosEscolaresRepository } from '../../../../infrastructure/bd/repositories/catalogos/periodos_escolares.entity';
+import { AlumnoDatosAcademicosRepository } from '../../../../infrastructure/bd/repositories/alumnos_datos_academicos.repositiry';
 
 @Injectable()
 export class CrearSsDocumentosAlumnosUseCase {
@@ -12,6 +14,9 @@ export class CrearSsDocumentosAlumnosUseCase {
 
     @Inject(STORAGE_SERVICE)
     private readonly storageService: IStorageService,
+
+    private readonly periodosRepository: PeriodosEscolaresRepository,
+    private readonly alumnoRepository: AlumnoDatosAcademicosRepository,
   ) {}
 
   async Ejecutar(
@@ -19,9 +24,23 @@ export class CrearSsDocumentosAlumnosUseCase {
     archivos: { [campo: string]: Express.Multer.File[] },
   ): Promise<SsDocumentosAlumnosPoco> {
     const bucket = process.env.GARAGE_BUCKET_SERVICIO_SOCIAL;
-    const folder = `documentos-alumnos/${dto.id_alumno_academico}`;
 
-    // 1. Sube cada archivo a Garage y obtiene su path
+    // 1. Obtener periodo activo y no_control del alumno
+    const periodoActivo = await this.periodosRepository.ObtenerPeriodoActivo();
+    const noControl = await this.alumnoRepository.ObtenerNoControlPorId(
+      Number(dto.id_alumno_academico),
+    );
+
+    if (!noControl) {
+      throw new NotFoundException(
+        `No se encontró el alumno con id ${dto.id_alumno_academico}`,
+      );
+    }
+
+    // 2. Construir la carpeta: ServicioSocial/2025-1/12345678
+    const folder = `ServicioSocial/${periodoActivo}/${noControl}`;
+
+    // 3. Subir archivos a Garage
     const carta_presentacion = archivos?.carta_presentacion
       ? (await this.storageService.upload(bucket, archivos.carta_presentacion[0], folder)).path
       : null;
@@ -38,7 +57,7 @@ export class CrearSsDocumentosAlumnosUseCase {
       ? (await this.storageService.upload(bucket, archivos.seguro_facultativo[0], folder)).path
       : null;
 
-    // 2. Guarda los paths en PostgreSQL
+    // 4. Guardar paths en PostgreSQL
     const poco = await this.documentosRepository.Crear(dto, {
       carta_presentacion,
       carta_compromiso,
@@ -46,7 +65,7 @@ export class CrearSsDocumentosAlumnosUseCase {
       seguro_facultativo,
     });
 
-    // 3. Convierte los paths a presigned URLs antes de retornar
+    // 5. Convertir paths a presigned URLs
     return new SsDocumentosAlumnosPoco(
       poco.id,
       poco.id_alumno_academico,

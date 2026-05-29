@@ -186,4 +186,11 @@ export class AlumnoDatosAcademicosRepository
     };
   }
 
+  async ObtenerNoControlPorId(id: number): Promise<string | null> {
+    const entity = await this.alumnoRepository.findOne({
+      where: { id },
+    });
+    return entity ? entity.no_control : null;
+  }
+
 }

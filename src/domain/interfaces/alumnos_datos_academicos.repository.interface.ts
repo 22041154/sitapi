@@ -18,4 +18,8 @@ export interface IAlumnoDatosAcademicosRepository {
     permisos: string[];
   }>;
 
+  ObtenerNoControlPorId(
+    id: number
+  ): Promise<string | null>;
+
 }

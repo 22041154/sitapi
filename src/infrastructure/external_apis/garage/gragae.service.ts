@@ -28,7 +28,7 @@ export class GarageService implements IStorageService {
     folder: string = 'general',
   ): Promise<UploadResult> {
     const ext        = path.extname(file.originalname);
-    const uniqueName = `${uuidv4()}${ext}`;
+    const uniqueName = file.originalname;
     const objectKey  = `${folder}/${uniqueName}`;
 
     try {
