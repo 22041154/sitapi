@@ -22,6 +22,8 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
+import { RolesGuard } from '../../../infrastructure/security/auth/roles.guard';
+import { Roles } from '../../../infrastructure/security/auth/decorators/roles.decorator';
 
 import { ObtenerResEmpresasUseCase } from '../../logic/residencias_profesionales/Empresas/obtener_res_empresas.logic';
 import { CrearResEmpresasUseCase } from '../../logic/residencias_profesionales/Empresas/crear_res_empresas.logic';
@@ -33,24 +35,21 @@ import { ActualizarResEmpresaDto } from '../../../dtos/requests/Residencias Prof
 
 @ApiTags('Residencias Profesionales - Empresas')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @Controller('residencias-profesionales/empresas')
 export class ResEmpresasController {
 
     constructor(
-        private readonly obtenerResEmpresasUseCase:
-        ObtenerResEmpresasUseCase,
-
-        private readonly crearResEmpresasUseCase:
-        CrearResEmpresasUseCase,
-
-        private readonly eliminarResEmpresasUseCase:
-        EliminarResEmpresasUseCase,
-
-        private readonly actualizarResEmpresasUseCase:
-        ActualizarResEmpresasUseCase,
+        private readonly obtenerResEmpresasUseCase: ObtenerResEmpresasUseCase,
+        private readonly crearResEmpresasUseCase: CrearResEmpresasUseCase,
+        private readonly eliminarResEmpresasUseCase: EliminarResEmpresasUseCase,
+        private readonly actualizarResEmpresasUseCase: ActualizarResEmpresasUseCase,
     ) {}
 
+    /*
+        TODOS LOS ROLES (ALUMNO, ADMIN, SUPER_ADMIN)
+    */
+    @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
     @Get()
     @ApiOperation({
         summary: 'Obtener todas las empresas',
@@ -64,16 +63,21 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'No se encontraron empresas',
     })
     async ObtenerTodos() {
-
-        return this.obtenerResEmpresasUseCase
-            .ObtenerTodos();
-
+        return this.obtenerResEmpresasUseCase.ObtenerTodos();
     }
 
+    /*
+        TODOS LOS ROLES (ALUMNO, ADMIN, SUPER_ADMIN)
+    */
+    @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
     @Get('id/:id')
     @ApiOperation({
         summary: 'Obtener empresa por id',
@@ -92,6 +96,10 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Empresa no encontrada',
     })
@@ -99,12 +107,13 @@ export class ResEmpresasController {
         @Param('id', ParseIntPipe)
         id: number,
     ) {
-
-        return this.obtenerResEmpresasUseCase
-            .ObtenerPorId(id);
-
+        return this.obtenerResEmpresasUseCase.ObtenerPorId(id);
     }
 
+    /*
+        TODOS LOS ROLES (ALUMNO, ADMIN, SUPER_ADMIN)
+    */
+    @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
     @Get('nombre/:nombre')
     @ApiOperation({
         summary: 'Obtener empresas por nombre',
@@ -123,6 +132,10 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'No se encontraron empresas con ese nombre',
     })
@@ -130,12 +143,13 @@ export class ResEmpresasController {
         @Param('nombre')
         nombre: string,
     ) {
-
-        return this.obtenerResEmpresasUseCase
-            .ObtenerPorNombre(nombre);
-
+        return this.obtenerResEmpresasUseCase.ObtenerPorNombre(nombre);
     }
 
+    /*
+        TODOS LOS ROLES (ALUMNO, ADMIN, SUPER_ADMIN)
+    */
+    @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
     @Get('localizacion/:localizacion')
     @ApiOperation({
         summary: 'Obtener empresas por localización',
@@ -154,6 +168,10 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'No se encontraron empresas en esa localización',
     })
@@ -161,12 +179,13 @@ export class ResEmpresasController {
         @Param('localizacion')
         localizacion: string,
     ) {
-
-        return this.obtenerResEmpresasUseCase
-            .ObtenerPorLocalizacion(localizacion);
-
+        return this.obtenerResEmpresasUseCase.ObtenerPorLocalizacion(localizacion);
     }
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({
@@ -188,6 +207,10 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 409,
         description: 'La empresa ya existe',
     })
@@ -195,12 +218,13 @@ export class ResEmpresasController {
         @Body()
         dto: CrearResEmpresaDto,
     ) {
-
-        return this.crearResEmpresasUseCase
-            .Ejecutar(dto);
-
+        return this.crearResEmpresasUseCase.Ejecutar(dto);
     }
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Put('id/:id')
     @ApiOperation({
         summary: 'Actualizar empresa por id',
@@ -226,26 +250,30 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Empresa no encontrada',
     })
     @ApiResponse({
         status: 409,
-        description: 'La empresa ya existe',
+        description: 'Conflicto con datos existentes',
     })
     async Actualizar(
         @Param('id', ParseIntPipe)
         id: number,
-
         @Body()
         dto: ActualizarResEmpresaDto,
     ) {
-
-        return this.actualizarResEmpresasUseCase
-            .Ejecutar(id, dto);
-
+        return this.actualizarResEmpresasUseCase.Ejecutar(id, dto);
     }
 
+    /*
+        SOLO SUPER_ADMIN
+    */
+    @Roles('SUPER_ADMIN')
     @Delete('id/:id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({
@@ -265,6 +293,10 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Empresa no encontrada',
     })
@@ -272,12 +304,13 @@ export class ResEmpresasController {
         @Param('id', ParseIntPipe)
         id: number,
     ) {
-
-        await this.eliminarResEmpresasUseCase
-            .EliminarPorId(id);
-
+        await this.eliminarResEmpresasUseCase.EliminarPorId(id);
     }
 
+    /*
+        SOLO SUPER_ADMIN
+    */
+    @Roles('SUPER_ADMIN')
     @Delete('nombre/:nombre')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({
@@ -297,6 +330,10 @@ export class ResEmpresasController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'No se encontraron empresas con ese nombre',
     })
@@ -304,10 +341,6 @@ export class ResEmpresasController {
         @Param('nombre')
         nombre: string,
     ) {
-
-        await this.eliminarResEmpresasUseCase
-            .EliminarPorNombre(nombre);
-
+        await this.eliminarResEmpresasUseCase.EliminarPorNombre(nombre);
     }
-
 }

@@ -42,30 +42,25 @@ export class IniciarSesionUseCase {
     ) {
 
       const roles = ['SUPER_ADMIN'];
-
       const permisos = ['*'];
 
       const payload = {
         sub: 0,
         no_control: 'superadmin',
-
         roles,
         permisos,
+        rol: 'SUPER_ADMIN',           // <-- NUEVO: rol singular
+        idAlumnoAcademico: null,      // <-- NUEVO: no es alumno
       };
 
-      const accessToken =
-        await this.jwtService.signAsync(payload);
+      const accessToken = await this.jwtService.signAsync(payload);
 
-      const refreshToken =
-        await this.jwtService.signAsync(payload, {
-          expiresIn: this.configService.get<string>(
-            'JWT_REFRESH_EXPIRATION',
-          ) as any,
-        });
+      const refreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION') as any,
+      });
 
       return {
         type: 'alumnos',
-
         attributes: {
           nombre: 'Super Admin',
           matricula: 'superadmin',
@@ -73,13 +68,9 @@ export class IniciarSesionUseCase {
           carrera: 'Sistema',
           semestre_activo: true,
         },
-
         roles,
-
         permisos,
-
         access_token: accessToken,
-
         refresh_token: refreshToken,
       };
     }
@@ -96,12 +87,10 @@ export class IniciarSesionUseCase {
     ) {
 
       const roles = ['ADMIN'];
-
       const permisos = [
         'usuarios.read',
         'usuarios.create',
         'usuarios.update',
-
         'programas.read',
         'programas.create',
         'programas.update',
@@ -110,24 +99,20 @@ export class IniciarSesionUseCase {
       const payload = {
         sub: 1,
         no_control: 'admin',
-
         roles,
         permisos,
+        rol: 'ADMIN',                 // <-- NUEVO: rol singular
+        idAlumnoAcademico: null,      // <-- NUEVO: no es alumno
       };
 
-      const accessToken =
-        await this.jwtService.signAsync(payload);
+      const accessToken = await this.jwtService.signAsync(payload);
 
-      const refreshToken =
-        await this.jwtService.signAsync(payload, {
-          expiresIn: this.configService.get<string>(
-            'JWT_REFRESH_EXPIRATION',
-          ) as any,
-        });
+      const refreshToken = await this.jwtService.signAsync(payload, {
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION') as any,
+      });
 
       return {
         type: 'alumnos',
-
         attributes: {
           nombre: 'Administrador',
           matricula: 'admin',
@@ -135,13 +120,9 @@ export class IniciarSesionUseCase {
           carrera: 'Sistema',
           semestre_activo: true,
         },
-
         roles,
-
         permisos,
-
         access_token: accessToken,
-
         refresh_token: refreshToken,
       };
     }
@@ -152,87 +133,55 @@ export class IniciarSesionUseCase {
     ============================================
     */
 
-    const alumno = await this.alumnoRepository
-      .BuscarPorNoControl(noControl);
+    const alumno = await this.alumnoRepository.BuscarPorNoControl(noControl);
 
     if (!alumno) {
-      throw new UnauthorizedException(
-        'Credenciales incorrectas',
-      );
+      throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    /*
-      Validar NIP
-    */
+    // Validar NIP
     if (!alumno.ValidarNip(Number(nip))) {
-      throw new UnauthorizedException(
-        'Credenciales incorrectas',
-      );
+      throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    /*
-      Obtener datos login
-    */
-    const datosLogin = await this.alumnoRepository
-      .ObtenerDatosLoginPorNoControl(noControl);
+    // Obtener datos login
+    const datosLogin = await this.alumnoRepository.ObtenerDatosLoginPorNoControl(noControl);
 
     if (!datosLogin) {
-      throw new UnauthorizedException(
-        'No se pudieron obtener los datos del alumno',
-      );
+      throw new UnauthorizedException('No se pudieron obtener los datos del alumno');
     }
 
-    /*
-      Obtener roles y permisos
-    */
-    const {
-      roles,
-      permisos,
-    } = await this.alumnoRepository
-      .ObtenerRolesYPermisos(noControl);
+    // Obtener roles y permisos
+    const { roles, permisos } = await this.alumnoRepository.ObtenerRolesYPermisos(noControl);
+
+    // Asumimos que el primer rol es el principal (ej: 'ALUMNO')
+    const rolPrincipal = roles && roles.length > 0 ? roles[0] : 'ALUMNO';
 
     /*
-      Payload JWT
+      Payload JWT con datos necesarios para OwnershipGuard / validaciones
     */
     const payload = {
       sub: alumno.id,
       no_control: alumno.noControl,
-
       roles,
       permisos,
+      rol: rolPrincipal,                         // <-- NUEVO: rol singular
+      idAlumnoAcademico: alumno.id,              // <-- NUEVO: ID del alumno académico
     };
 
-    /*
-      Access token
-    */
-    const accessToken = await this.jwtService
-      .signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload);
 
-    /*
-      Refresh expiration
-    */
-    const refreshExpiration =
-      this.configService.get<string>(
-        'JWT_REFRESH_EXPIRATION',
-      );
+    const refreshExpiration = this.configService.get<string>('JWT_REFRESH_EXPIRATION');
 
     if (!refreshExpiration) {
-      throw new UnauthorizedException(
-        'Configuración de refresh token no encontrada',
-      );
+      throw new UnauthorizedException('Configuración de refresh token no encontrada');
     }
 
-    /*
-      Refresh token
-    */
-    const refreshToken = await this.jwtService
-      .signAsync(payload, {
-        expiresIn: refreshExpiration as any,
-      });
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: refreshExpiration as any,
+    });
 
-    /*
-      Response
-    */
+    // Usar el presenter para armar la respuesta
     return LoginAlumnoPresenter.Presentar(
       datosLogin,
       accessToken,
@@ -241,5 +190,4 @@ export class IniciarSesionUseCase {
       permisos,
     );
   }
-
 }

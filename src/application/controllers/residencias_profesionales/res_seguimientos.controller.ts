@@ -11,6 +11,7 @@ import {
     UseGuards,
     HttpCode,
     HttpStatus,
+    Req,
 } from '@nestjs/common';
 
 import {
@@ -22,42 +23,39 @@ import {
     ApiBody,
 } from '@nestjs/swagger';
 
+import { Request } from 'express';
+
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
+import { RolesGuard } from '../../../infrastructure/security/auth/roles.guard';
+import { Roles } from '../../../infrastructure/security/auth/decorators/roles.decorator';
 
 import { ObtenerResSeguimientosUseCase } from '../../logic/residencias_profesionales/Seguimientos/obtener_res_seguimientos.use.case';
-
 import { CrearResSeguimientosUseCase } from '../../logic/residencias_profesionales/Seguimientos/crear_res_seguimientos.use.case';
-
 import { ActualizarResSeguimientosUseCase } from '../../logic/residencias_profesionales/Seguimientos/actualizar_res_seguimientos.use.case';
-
 import { EliminarResSeguimientosUseCase } from '../../logic/residencias_profesionales/Seguimientos/eliminar_res_seguimientos.use.case';
 
 import { CrearResSeguimientoDto } from '../../../dtos/requests/Residencias Profesionales/res_seguimientos/crear_res_seguimientos.request';
-
 import { ActualizarResSeguimientoDto } from '../../../dtos/requests/Residencias Profesionales/res_seguimientos/actualizar_res_siguimientos.request';
 
 import { ResSeguimientosPresenter } from '../../presenters/residencias_profesionales/res_seguimientos.presenter';
 
 @ApiTags('Residencias Profesionales - Seguimientos')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @Controller('residencias-profesionales/seguimientos')
 export class ResSeguimientosController {
 
     constructor(
-        private readonly obtenerResSeguimientosUseCase:
-        ObtenerResSeguimientosUseCase,
-
-        private readonly crearResSeguimientosUseCase:
-        CrearResSeguimientosUseCase,
-
-        private readonly actualizarResSeguimientosUseCase:
-        ActualizarResSeguimientosUseCase,
-
-        private readonly eliminarResSeguimientosUseCase:
-        EliminarResSeguimientosUseCase,
+        private readonly obtenerResSeguimientosUseCase: ObtenerResSeguimientosUseCase,
+        private readonly crearResSeguimientosUseCase: CrearResSeguimientosUseCase,
+        private readonly actualizarResSeguimientosUseCase: ActualizarResSeguimientosUseCase,
+        private readonly eliminarResSeguimientosUseCase: EliminarResSeguimientosUseCase,
     ) {}
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Get()
     @ApiOperation({
         summary: 'Obtener todos los seguimientos',
@@ -71,22 +69,22 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'No se encontraron seguimientos',
     })
     async ObtenerTodos() {
-
-        const seguimientos =
-            await this.obtenerResSeguimientosUseCase
-                .ObtenerTodos();
-
-        return ResSeguimientosPresenter
-            .PresentarLista(
-                seguimientos,
-            );
-
+        const seguimientos = await this.obtenerResSeguimientosUseCase.ObtenerTodos();
+        return ResSeguimientosPresenter.PresentarLista(seguimientos);
     }
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Get('id/:id')
     @ApiOperation({
         summary: 'Obtener seguimiento por id',
@@ -105,28 +103,28 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Seguimiento no encontrado',
     })
     async ObtenerPorId(
-        @Param('id', ParseIntPipe)
-        id: number,
+        @Param('id', ParseIntPipe) id: number,
     ) {
-
-        const seguimiento =
-            await this.obtenerResSeguimientosUseCase
-                .ObtenerPorId(id);
-
-        return ResSeguimientosPresenter
-            .Presentar(
-                seguimiento,
-            );
-
+        const seguimiento = await this.obtenerResSeguimientosUseCase.ObtenerPorId(id);
+        return ResSeguimientosPresenter.Presentar(seguimiento);
     }
 
+    /*
+        ALUMNO (SOLO EL SUYO), ADMIN Y SUPER_ADMIN
+    */
+    @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
     @Get('alumno-proyecto/:idAlumnoProyecto')
     @ApiOperation({
         summary: 'Obtener seguimiento por alumno proyecto',
+        description: 'ALUMNO: solo puede ver su propio seguimiento. ADMIN/SUPER_ADMIN: pueden ver cualquier seguimiento',
     })
     @ApiParam({
         name: 'idAlumnoProyecto',
@@ -142,30 +140,27 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para ver este seguimiento',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Seguimiento no encontrado',
     })
     async ObtenerPorAlumnoProyecto(
-        @Param(
-            'idAlumnoProyecto',
-            ParseIntPipe,
-        )
-        idAlumnoProyecto: number,
+        @Param('idAlumnoProyecto', ParseIntPipe) idAlumnoProyecto: number,
+        @Req() req: any,
     ) {
-
-        const seguimiento =
-            await this.obtenerResSeguimientosUseCase
-                .ObtenerPorAlumnoProyecto(
-                    idAlumnoProyecto,
-                );
-
-        return ResSeguimientosPresenter
-            .Presentar(
-                seguimiento,
-            );
-
+        const usuario = req.user;
+        const seguimiento = await this.obtenerResSeguimientosUseCase
+            .ObtenerPorAlumnoProyecto(idAlumnoProyecto, usuario);
+        return ResSeguimientosPresenter.Presentar(seguimiento);
     }
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN (CREAR)
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({
@@ -187,25 +182,24 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 409,
         description: 'Ya existe un seguimiento para este alumno proyecto',
     })
     async Crear(
-        @Body()
-        dto: CrearResSeguimientoDto,
+        @Body() dto: CrearResSeguimientoDto,
     ) {
-
-        const seguimiento =
-            await this.crearResSeguimientosUseCase
-                .Ejecutar(dto);
-
-        return ResSeguimientosPresenter
-            .Presentar(
-                seguimiento,
-            );
-
+        const seguimiento = await this.crearResSeguimientosUseCase.Ejecutar(dto);
+        return ResSeguimientosPresenter.Presentar(seguimiento);
     }
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN (ACTUALIZAR PUT)
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Put('id/:id')
     @ApiOperation({
         summary: 'Actualizar completamente un seguimiento',
@@ -231,6 +225,10 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Seguimiento no encontrado',
     })
@@ -239,27 +237,17 @@ export class ResSeguimientosController {
         description: 'Ya existe un seguimiento para este alumno proyecto',
     })
     async Actualizar(
-        @Param('id', ParseIntPipe)
-        id: number,
-
-        @Body()
-        dto: ActualizarResSeguimientoDto,
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: ActualizarResSeguimientoDto,
     ) {
-
-        const seguimiento =
-            await this.actualizarResSeguimientosUseCase
-                .Ejecutar(
-                    id,
-                    dto,
-                );
-
-        return ResSeguimientosPresenter
-            .Presentar(
-                seguimiento,
-            );
-
+        const seguimiento = await this.actualizarResSeguimientosUseCase.Ejecutar(id, dto);
+        return ResSeguimientosPresenter.Presentar(seguimiento);
     }
 
+    /*
+        SOLO ADMIN Y SUPER_ADMIN (ACTUALIZAR PATCH)
+    */
+    @Roles('ADMIN', 'SUPER_ADMIN')
     @Patch('id/:id')
     @ApiOperation({
         summary: 'Actualizar parcialmente un seguimiento',
@@ -285,6 +273,10 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Seguimiento no encontrado',
     })
@@ -293,27 +285,17 @@ export class ResSeguimientosController {
         description: 'Ya existe un seguimiento para este alumno proyecto',
     })
     async ActualizarParcial(
-        @Param('id', ParseIntPipe)
-        id: number,
-
-        @Body()
-        dto: ActualizarResSeguimientoDto,
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: ActualizarResSeguimientoDto,
     ) {
-
-        const seguimiento =
-            await this.actualizarResSeguimientosUseCase
-                .Ejecutar(
-                    id,
-                    dto,
-                );
-
-        return ResSeguimientosPresenter
-            .Presentar(
-                seguimiento,
-            );
-
+        const seguimiento = await this.actualizarResSeguimientosUseCase.Ejecutar(id, dto);
+        return ResSeguimientosPresenter.Presentar(seguimiento);
     }
 
+    /*
+        SOLO SUPER_ADMIN (ELIMINAR)
+    */
+    @Roles('SUPER_ADMIN')
     @Delete('id/:id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({
@@ -333,17 +315,16 @@ export class ResSeguimientosController {
         description: 'No autorizado',
     })
     @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos',
+    })
+    @ApiResponse({
         status: 404,
         description: 'Seguimiento no encontrado',
     })
     async EliminarPorId(
-        @Param('id', ParseIntPipe)
-        id: number,
+        @Param('id', ParseIntPipe) id: number,
     ) {
-
-        await this.eliminarResSeguimientosUseCase
-            .EliminarPorId(id);
-
+        await this.eliminarResSeguimientosUseCase.EliminarPorId(id);
     }
-
 }

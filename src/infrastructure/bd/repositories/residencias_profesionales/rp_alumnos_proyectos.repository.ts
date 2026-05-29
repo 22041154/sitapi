@@ -165,4 +165,20 @@ export class ResAlumnosProyectosRepository
 
     }
 
+    async VerificarPertenencia(
+        idAlumnoProyecto: number,
+        idAlumnoAcademico: number,
+        ): Promise<boolean> {
+
+            const count = await this.repository.count({
+                where: {
+                    id: idAlumnoProyecto,
+                    id_alumno_academico: idAlumnoAcademico,
+                },
+            });
+
+            return count > 0;
+
+    }
+
 }

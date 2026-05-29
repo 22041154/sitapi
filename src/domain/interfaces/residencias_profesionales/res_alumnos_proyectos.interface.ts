@@ -25,4 +25,10 @@ export interface IResAlumnosProyectosRepository {
 
     Eliminar(id: number): Promise<void>;
 
+    // NUEVO MÉTODO
+    VerificarPertenencia(
+        idAlumnoProyecto: number,
+        idAlumnoAcademico: number,
+    ): Promise<boolean>;
+
 }
