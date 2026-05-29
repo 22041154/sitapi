@@ -27,7 +27,7 @@ export class SsProgramasEntity {
   @Column({ type: 'varchar', length: 300 })
   lista_actividades: string;
 
-  @Column({ type: 'bytea', nullable: true })
-  plan_trabajo: Buffer;
+  @Column({ type: 'text', nullable: true })
+  plan_trabajo: string; // Ahora guarda el path en Garage, no el binario
 
 }

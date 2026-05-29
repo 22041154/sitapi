@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Put, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFile, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFiles, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiConsumes } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { RolesGuard } from '../../../infrastructure/security/auth/roles.guard';
@@ -8,11 +9,24 @@ import { Roles } from '../../../infrastructure/security/auth/decorators/roles.de
 
 import { ObtenerSsProgramas } from '../../logic/servicio_Social/Programas/obtemer_ss_programas';
 import { CrearSsProgramaUseCase } from '../../logic/servicio_Social/Programas/crear_ss_programas';
-import { CrearSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 import { EliminarSsProgramasUseCase } from '../../logic/servicio_Social/Programas/eliminar_ss_programas';
 import { ActualizarSsProgramaUseCase } from '../../logic/servicio_Social/Programas/actualizar_ss_programas';
+import { CrearSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 import { ActualizarSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/avtualizar_ss_programas';
 import { SsProgramasPresenter } from '../../presenters/servicio_social/ss_programas.presenter';
+
+// Configuración de Multer: archivos en memoria, sin tocar el disco
+const memoriaStorage = memoryStorage();
+const interceptorArchivos = FileFieldsInterceptor(
+  [
+    { name: 'plan_trabajo', maxCount: 1 },
+  ],
+  { storage: memoriaStorage },
+);
+
+type ArchivosPrograma = {
+  plan_trabajo?: Express.Multer.File[];
+};
 
 @ApiTags('Servicio Social - Programas')
 @ApiBearerAuth('access-token')
@@ -37,7 +51,8 @@ export class SsProgramasController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 404, description: 'No se encontraron programas' })
   async ObtenerTodos() {
-    return this.obtenerSsProgramasUseCase.ObtenerTodos();
+    const pocos = await this.obtenerSsProgramasUseCase.ObtenerTodos();
+    return SsProgramasPresenter.PresentarLista(pocos);
   }
 
   /*
@@ -47,7 +62,8 @@ export class SsProgramasController {
   @Get('vigentes')
   @ApiOperation({ summary: 'Obtener programas vigentes' })
   async ObtenerVigentes() {
-    return this.obtenerSsProgramasUseCase.ObtenerVigentes();
+    const pocos = await this.obtenerSsProgramasUseCase.ObtenerVigentes();
+    return SsProgramasPresenter.PresentarLista(pocos);
   }
 
   /*
@@ -58,7 +74,8 @@ export class SsProgramasController {
   @ApiOperation({ summary: 'Obtener programa por id' })
   @ApiParam({ name: 'id', type: Number })
   async ObtenerPorId(@Param('id', ParseIntPipe) id: number) {
-    return this.obtenerSsProgramasUseCase.ObtenerPorId(id);
+    const poco = await this.obtenerSsProgramasUseCase.ObtenerPorId(id);
+    return SsProgramasPresenter.Presentar(poco);
   }
 
   /*
@@ -68,7 +85,8 @@ export class SsProgramasController {
   @Get('nombre/:nombrePrograma')
   @ApiOperation({ summary: 'Obtener programas por nombre' })
   async ObtenerPorNombrePrograma(@Param('nombrePrograma') nombrePrograma: string) {
-    return this.obtenerSsProgramasUseCase.ObtenerPorNombrePrograma(nombrePrograma);
+    const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorNombrePrograma(nombrePrograma);
+    return SsProgramasPresenter.PresentarLista(pocos);
   }
 
   /*
@@ -77,7 +95,8 @@ export class SsProgramasController {
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('organizacion/:idOrganizacion')
   async ObtenerPorOrganizacion(@Param('idOrganizacion', ParseIntPipe) idOrganizacion: number) {
-    return this.obtenerSsProgramasUseCase.ObtenerPorOrganizacion(idOrganizacion);
+    const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorOrganizacion(idOrganizacion);
+    return SsProgramasPresenter.PresentarLista(pocos);
   }
 
   /*
@@ -86,7 +105,8 @@ export class SsProgramasController {
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('tipo/:idTipoPrograma')
   async ObtenerPorTipoPrograma(@Param('idTipoPrograma', ParseIntPipe) idTipoPrograma: number) {
-    return this.obtenerSsProgramasUseCase.ObtenerPorTipoPrograma(idTipoPrograma);
+    const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorTipoPrograma(idTipoPrograma);
+    return SsProgramasPresenter.PresentarLista(pocos);
   }
 
   /*
@@ -95,7 +115,8 @@ export class SsProgramasController {
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('modalidad/:modalidad')
   async ObtenerPorModalidad(@Param('modalidad', ParseBoolPipe) modalidad: boolean) {
-    return this.obtenerSsProgramasUseCase.ObtenerPorModalidad(modalidad);
+    const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorModalidad(modalidad);
+    return SsProgramasPresenter.PresentarLista(pocos);
   }
 
   /*
@@ -104,15 +125,15 @@ export class SsProgramasController {
   @Roles('ADMIN', 'SUPER_ADMIN')
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('plan_trabajo'))
-  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Crear un nuevo programa' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(interceptorArchivos)
   async Crear(
     @Body() dto: CrearSsProgramaDto,
-    @UploadedFile() file?: any,
+    @UploadedFiles() files: ArchivosPrograma,
   ) {
-    const planTrabajo = file ? file.buffer : undefined;
-    return this.crearSsProgramaUseCase.Ejecutar(dto, planTrabajo);
+    const poco = await this.crearSsProgramaUseCase.Ejecutar(dto, files);
+    return SsProgramasPresenter.Presentar(poco);
   }
 
   /*
@@ -120,14 +141,16 @@ export class SsProgramasController {
   */
   @Roles('ADMIN', 'SUPER_ADMIN')
   @Put('id/:id')
-  @UseInterceptors(FileInterceptor('plan_trabajo'))
+  @ApiOperation({ summary: 'Actualizar un programa' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', type: Number, description: 'ID del programa a actualizar' })
+  @UseInterceptors(interceptorArchivos)
   async Actualizar(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ActualizarSsProgramaDto,
-    @UploadedFile() file?: any,
+    @UploadedFiles() files: ArchivosPrograma,
   ) {
-    const planTrabajo = file ? file.buffer : undefined;
-    const poco = await this.actualizarSsProgramasUseCase.Ejecutar(id, dto, planTrabajo);
+    const poco = await this.actualizarSsProgramasUseCase.Ejecutar(id, dto, files);
     return SsProgramasPresenter.Presentar(poco);
   }
 
@@ -136,6 +159,8 @@ export class SsProgramasController {
   */
   @Roles('ADMIN', 'SUPER_ADMIN')
   @Delete('id/:id')
+  @ApiOperation({ summary: 'Eliminar un programa' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del programa a eliminar' })
   async Eliminar(@Param('id', ParseIntPipe) id: number) {
     await this.eliminarSsProgramasUseCase.Ejecutar(id);
     return {

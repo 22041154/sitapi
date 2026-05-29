@@ -4,8 +4,11 @@ import { Repository } from 'typeorm';
 import { SsProgramasEntity } from '../../entities/servicio_social/ss_programas.entity';
 import { SsOrganizacionesEntity } from '../../entities/servicio_social/ss_organizaciones.entity';
 import { SsTiposProgramasEntity } from '../../entities/servicio_social/ss_tipos_programas.entity';
-import { SsProgramas } from '../../../../dtos/POCOS/servicio_social/ss_programas.poco';
-import { ISsProgramasRepository } from '../../../../domain/interfaces/servicio_social/ss_programas.interface';
+import { SsProgramasPoco } from '../../../../dtos/POCOS/servicio_social/ss_programas.poco';
+import { 
+  ISsProgramasRepository,
+  ProgramaPaths,
+} from '../../../../domain/interfaces/servicio_social/ss_programas.interface';
 import { CrearSsProgramaDto } from '../../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 import { ActualizarSsProgramaDto } from '../../../../dtos/requests/Servicio Social/Programas/avtualizar_ss_programas';
 
@@ -17,8 +20,9 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     private readonly ssProgramasRepository: Repository<SsProgramasEntity>,
   ) {}
 
-  private MapearEntidadADominio(row: any): SsProgramas {
-    return new SsProgramas(
+  // ─── MAPPER ──────────────────────────────────────────────────────────────
+  private MapearEntidadADominio(row: any): SsProgramasPoco {
+    return new SsProgramasPoco(
       Number(row.id),
       Number(row.id_organizacion),
       row.nombre_organizacion,
@@ -29,7 +33,7 @@ export class SsProgramasRepository implements ISsProgramasRepository {
       row.modalidad,
       row.fecha_inicio_servicio,
       row.fecha_fin_servicio,
-      row.plan_trabajo,
+      row.plan_trabajo, // Ahora es string | null
     );
   }
 
@@ -61,12 +65,13 @@ export class SsProgramasRepository implements ISsProgramasRepository {
       ]);
   }
 
-  async ObtenerTodos(): Promise<SsProgramas[]> {
+  // ─── QUERIES ─────────────────────────────────────────────────────────────
+  async ObtenerTodos(): Promise<SsProgramasPoco[]> {
     const results = await this.ConstruirQuery().getRawMany();
     return results.map(row => this.MapearEntidadADominio(row));
   }
 
-  async ObtenerPorId(id: number): Promise<SsProgramas | null> {
+  async ObtenerPorId(id: number): Promise<SsProgramasPoco | null> {
     const row = await this.ConstruirQuery()
       .where('programa.id = :id', { id })
       .getRawOne();
@@ -74,7 +79,7 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     return row ? this.MapearEntidadADominio(row) : null;
   }
 
-  async ObtenerPorNombrePrograma(nombrePrograma: string): Promise<SsProgramas[]> {
+  async ObtenerPorNombrePrograma(nombrePrograma: string): Promise<SsProgramasPoco[]> {
     const results = await this.ConstruirQuery()
       .where('programa.nombre_programa ILIKE :nombrePrograma', { nombrePrograma: `%${nombrePrograma}%` })
       .getRawMany();
@@ -82,7 +87,7 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     return results.map(row => this.MapearEntidadADominio(row));
   }
 
-  async ObtenerPorOrganizacion(idOrganizacion: number): Promise<SsProgramas[]> {
+  async ObtenerPorOrganizacion(idOrganizacion: number): Promise<SsProgramasPoco[]> {
     const results = await this.ConstruirQuery()
       .where('programa.id_organizacion = :idOrganizacion', { idOrganizacion })
       .getRawMany();
@@ -90,7 +95,7 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     return results.map(row => this.MapearEntidadADominio(row));
   }
 
-  async ObtenerPorTipoPrograma(idTipoPrograma: number): Promise<SsProgramas[]> {
+  async ObtenerPorTipoPrograma(idTipoPrograma: number): Promise<SsProgramasPoco[]> {
     const results = await this.ConstruirQuery()
       .where('programa.id_tipo_programa = :idTipoPrograma', { idTipoPrograma })
       .getRawMany();
@@ -98,7 +103,7 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     return results.map(row => this.MapearEntidadADominio(row));
   }
 
-  async ObtenerPorModalidad(modalidad: boolean): Promise<SsProgramas[]> {
+  async ObtenerPorModalidad(modalidad: boolean): Promise<SsProgramasPoco[]> {
     const results = await this.ConstruirQuery()
       .where('programa.modalidad = :modalidad', { modalidad })
       .getRawMany();
@@ -106,7 +111,7 @@ export class SsProgramasRepository implements ISsProgramasRepository {
     return results.map(row => this.MapearEntidadADominio(row));
   }
 
-  async ObtenerVigentes(): Promise<SsProgramas[]> {
+  async ObtenerVigentes(): Promise<SsProgramasPoco[]> {
     const hoy = new Date();
     const results = await this.ConstruirQuery()
       .where('programa.fecha_fin_servicio >= :hoy', { hoy })
@@ -114,11 +119,26 @@ export class SsProgramasRepository implements ISsProgramasRepository {
 
     return results.map(row => this.MapearEntidadADominio(row));
   }
-    async Eliminar(id: number): Promise<void> {
+
+  // ─── Obtiene solo el path (usado por la logic para ir a Garage) ──────────
+  async ObtenerPathsPorId(id: number): Promise<ProgramaPaths | null> {
+    const entidad = await this.ssProgramasRepository.findOne({ where: { id } });
+    if (!entidad) return null;
+
+    return {
+      plan_trabajo: entidad.plan_trabajo,
+    };
+  }
+
+  // ─── COMMANDS ────────────────────────────────────────────────────────────
+  async Eliminar(id: number): Promise<void> {
     await this.ssProgramasRepository.delete(id);
   }
 
-  async Crear(dto: CrearSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas> {
+  async Crear(
+    dto: CrearSsProgramaDto,
+    paths: ProgramaPaths,
+  ): Promise<SsProgramasPoco> {
     const entity = this.ssProgramasRepository.create({
       id_organizacion: dto.id_organizacion,
       id_tipo_programa: dto.id_tipo_programa,
@@ -127,15 +147,18 @@ export class SsProgramasRepository implements ISsProgramasRepository {
       fecha_inicio_servicio: dto.fecha_inicio_servicio ? new Date(dto.fecha_inicio_servicio) : null,
       fecha_fin_servicio: dto.fecha_fin_servicio ? new Date(dto.fecha_fin_servicio) : null,
       lista_actividades: dto.lista_actividades,
-      plan_trabajo: planTrabajo ?? null,
+      plan_trabajo: paths.plan_trabajo ?? null,
     });
 
     const entityGuardada = await this.ssProgramasRepository.save(entity);
-
     return this.ObtenerPorId(Number(entityGuardada.id));
   }
 
-  async Actualizar(id: number, dto: ActualizarSsProgramaDto, planTrabajo?: Buffer): Promise<SsProgramas> {
+  async Actualizar(
+    id: number,
+    dto: ActualizarSsProgramaDto,
+    paths: Partial<ProgramaPaths>,
+  ): Promise<SsProgramasPoco> {
     const entity = await this.ssProgramasRepository.findOne({
       where: { id }
     });
@@ -158,8 +181,10 @@ export class SsProgramasRepository implements ISsProgramasRepository {
       entity.fecha_fin_servicio = new Date(dto.fecha_fin_servicio);
     if (dto.lista_actividades !== undefined)
       entity.lista_actividades = dto.lista_actividades;
-    if (planTrabajo !== undefined)
-      entity.plan_trabajo = planTrabajo;
+    
+    // Solo actualiza el path si llegó un archivo nuevo
+    if (paths.plan_trabajo !== undefined)
+      entity.plan_trabajo = paths.plan_trabajo;
 
     const entityActualizada = await this.ssProgramasRepository.save(entity);
     return this.ObtenerPorId(Number(entityActualizada.id));

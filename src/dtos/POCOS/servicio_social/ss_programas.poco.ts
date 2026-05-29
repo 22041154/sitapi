@@ -1,4 +1,4 @@
-export class SsProgramas {
+export class SsProgramasPoco {
   constructor(
     public readonly id: number,
     public readonly idOrganizacion: number,
@@ -10,11 +10,10 @@ export class SsProgramas {
     public readonly modalidad?: boolean,
     public readonly fechaInicioServicio?: Date,
     public readonly fechaFinServicio?: Date,
-    public readonly planTrabajo?: Buffer,
+    public readonly plan_trabajo?: string | null, // Ahora es string (path/presigned URL)
   ) {}
 
   get EsModalidadInterna(): boolean {
     return this.modalidad === true;
   }
-
 }

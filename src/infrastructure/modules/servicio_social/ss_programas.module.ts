@@ -9,6 +9,7 @@ import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/P
 import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/crear_ss_programas';
 import { EliminarSsProgramasUseCase} from '../../../application/logic/servicio_Social/Programas/eliminar_ss_programas';
 import { ActualizarSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/actualizar_ss_programas';
+import { StorageModule } from '../storage.module'; // ← Importar StorageModule
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { ActualizarSsProgramaUseCase } from '../../../application/logic/servicio
       SsProgramasEntity,
       SsOrganizacionesEntity,
       SsTiposProgramasEntity,
-    ])
+    ]),
+    StorageModule, // ← Agregar StorageModule a imports
   ],
 
   providers: [
