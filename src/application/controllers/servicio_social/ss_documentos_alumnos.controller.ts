@@ -40,6 +40,8 @@ import { SsDocumentosAlumnosPresenter } from '../../presenters/servicio_social/s
 // Agrega estos imports
 import { UsuarioActual } from '../../../infrastructure/security/auth/decorators/usuario_actual.decorator';
 import { JwtPayload } from '../../../infrastructure/security/auth/intefraces/jwt_payload.interface';
+import { FiltroPdf } from '../../../infrastructure/security/filters/archivo_pdf.filter';
+import { ValidarPdfPipe } from '../../../infrastructure/security/pipes/validar_pdf.pipe';
 
 // Configuración de Multer: archivos en memoria, sin tocar el disco
 const memoriaStorage = memoryStorage();
@@ -50,7 +52,13 @@ const interceptorArchivos = FileFieldsInterceptor(
     { name: 'carta_aceptacion',    maxCount: 1 },
     { name: 'seguro_facultativo',  maxCount: 1 },
   ],
-  { storage: memoriaStorage },
+  { 
+    storage: memoriaStorage,
+    fileFilter: FiltroPdf,           // ← Capa 1
+    limits: {
+      fileSize: 5 * 1024 * 1024,    // ← 5 MB máximo por archivo
+    },
+  },
 );
 
 type ArchivosDocumentos = {
@@ -127,7 +135,7 @@ export class SsDocumentosAlumnosController {
   async Crear(
     @UsuarioActual() usuario: JwtPayload,   // ← toma el usuario del token
     @Body() dto: CrearSsDocumentosAlumnosDto,
-    @UploadedFiles() files: ArchivosDocumentos,
+    @UploadedFiles(ValidarPdfPipe) files: ArchivosDocumentos,
   ) {
     // Inyecta el id del alumno desde el token al DTO
     dto.id_alumno_academico = String(usuario.idAlumnoAcademico);
@@ -150,7 +158,7 @@ export class SsDocumentosAlumnosController {
   async Actualizar(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ActualizarSsDocumentosAlumnosDto,
-    @UploadedFiles() files: ArchivosDocumentos,
+    @UploadedFiles(ValidarPdfPipe) files: ArchivosDocumentos,
     @UsuarioActual() usuario: JwtPayload,  
   ) {
     const poco = await this.actualizarSsDocumentosAlumnosUseCase.Ejecutar(
