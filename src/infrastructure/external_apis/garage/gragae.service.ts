@@ -10,7 +10,6 @@ import {
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { v4 as uuidv4 } from 'uuid';
 import * as path from 'node:path';
 import { GarageClient } from './garage.client';
 import {
@@ -26,10 +25,14 @@ export class GarageService implements IStorageService {
     bucket: string,
     file: Express.Multer.File,
     folder: string = 'general',
+    customFileName?: string,  // ← nombre fijo opcional
   ): Promise<UploadResult> {
-    const ext        = path.extname(file.originalname);
-    const uniqueName = file.originalname;
-    const objectKey  = `${folder}/${uniqueName}`;
+    const ext      = path.extname(file.originalname);
+    const fileName = customFileName
+      ? `${customFileName}${ext}`  // usa nombre fijo + extensión original
+      : file.originalname;          // si no, usa el nombre original del archivo
+
+    const objectKey = `${folder}/${fileName}`;
 
     try {
       await this.garageClient.getClient().send(
@@ -107,8 +110,9 @@ export class GarageService implements IStorageService {
     oldPath: string,
     newFile: Express.Multer.File,
     folder?: string,
+    customFileName?: string,  // ← nombre fijo opcional
   ): Promise<UploadResult> {
-    const result = await this.upload(bucket, newFile, folder);
+    const result = await this.upload(bucket, newFile, folder, customFileName);
     await this.delete(bucket, oldPath);
     return result;
   }

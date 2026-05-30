@@ -11,6 +11,7 @@ export interface IStorageService {
     bucket: string,
     file: Express.Multer.File,
     folder?: string,
+    customFileName?: string,  // ← nuevo
   ): Promise<UploadResult>;
 
   getPresignedUrl(
@@ -34,6 +35,7 @@ export interface IStorageService {
     oldPath: string,
     newFile: Express.Multer.File,
     folder?: string,
+    customFileName?: string,  // ← nuevo
   ): Promise<UploadResult>;
 }
 

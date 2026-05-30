@@ -37,6 +37,10 @@ import { CrearSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Soc
 import { ActualizarSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/actualizar_ss_documentos_alumnos.dto';
 import { SsDocumentosAlumnosPresenter } from '../../presenters/servicio_social/ss_documentos_alumnos.presenter';
 
+// Agrega estos imports
+import { UsuarioActual } from '../../../infrastructure/security/auth/decorators/usuario_actual.decorator';
+import { JwtPayload } from '../../../infrastructure/security/auth/intefraces/jwt_payload.interface';
+
 // Configuración de Multer: archivos en memoria, sin tocar el disco
 const memoriaStorage = memoryStorage();
 const interceptorArchivos = FileFieldsInterceptor(
@@ -121,9 +125,12 @@ export class SsDocumentosAlumnosController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(interceptorArchivos)
   async Crear(
+    @UsuarioActual() usuario: JwtPayload,   // ← toma el usuario del token
     @Body() dto: CrearSsDocumentosAlumnosDto,
     @UploadedFiles() files: ArchivosDocumentos,
   ) {
+    // Inyecta el id del alumno desde el token al DTO
+    dto.id_alumno_academico = String(usuario.idAlumnoAcademico);
     const poco = await this.crearSsDocumentosAlumnosUseCase.Ejecutar(dto, files);
     return SsDocumentosAlumnosPresenter.Presentar(poco);
   }
@@ -144,8 +151,14 @@ export class SsDocumentosAlumnosController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ActualizarSsDocumentosAlumnosDto,
     @UploadedFiles() files: ArchivosDocumentos,
+    @UsuarioActual() usuario: JwtPayload,  
   ) {
-    const poco = await this.actualizarSsDocumentosAlumnosUseCase.Ejecutar(id, dto, files);
+    const poco = await this.actualizarSsDocumentosAlumnosUseCase.Ejecutar(
+      id,
+      dto,
+      files,
+      usuario.idAlumnoAcademico,  
+    );
     return SsDocumentosAlumnosPresenter.Presentar(poco);
   }
 

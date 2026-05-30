@@ -1,11 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CrearSsDocumentosAlumnosDto {
-  @ApiProperty({ example: '1', description: 'ID del alumno académico' })
-  @IsNotEmpty()
-  @IsString()
-  id_alumno_academico: string;
+  // Ya no se pide en el body, se toma del token
+  id_alumno_academico?: string;
 
   @ApiProperty({ example: '1', description: 'ID del plan de trabajo' })
   @IsNotEmpty()

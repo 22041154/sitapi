@@ -37,24 +37,44 @@ export class CrearSsDocumentosAlumnosUseCase {
       );
     }
 
-    // 2. Construir la carpeta: ServicioSocial/2025-1/12345678
+    // 2. Construir la carpeta: ServicioSocial/ENE-JUN/2026/21041305
     const folder = `ServicioSocial/${periodoActivo}/${noControl}`;
 
-    // 3. Subir archivos a Garage
+    // 3. Subir archivos a Garage con nombre fijo por campo
     const carta_presentacion = archivos?.carta_presentacion
-      ? (await this.storageService.upload(bucket, archivos.carta_presentacion[0], folder)).path
+      ? (await this.storageService.upload(
+          bucket,
+          archivos.carta_presentacion[0],
+          folder,
+          'carta_presentacion',  // ← nombre fijo
+        )).path
       : null;
 
     const carta_compromiso = archivos?.carta_compromiso
-      ? (await this.storageService.upload(bucket, archivos.carta_compromiso[0], folder)).path
+      ? (await this.storageService.upload(
+          bucket,
+          archivos.carta_compromiso[0],
+          folder,
+          'carta_compromiso',  // ← nombre fijo
+        )).path
       : null;
 
     const carta_aceptacion = archivos?.carta_aceptacion
-      ? (await this.storageService.upload(bucket, archivos.carta_aceptacion[0], folder)).path
+      ? (await this.storageService.upload(
+          bucket,
+          archivos.carta_aceptacion[0],
+          folder,
+          'carta_aceptacion',  // ← nombre fijo
+        )).path
       : null;
 
     const seguro_facultativo = archivos?.seguro_facultativo
-      ? (await this.storageService.upload(bucket, archivos.seguro_facultativo[0], folder)).path
+      ? (await this.storageService.upload(
+          bucket,
+          archivos.seguro_facultativo[0],
+          folder,
+          'seguro_facultativo',  // ← nombre fijo
+        )).path
       : null;
 
     // 4. Guardar paths en PostgreSQL
