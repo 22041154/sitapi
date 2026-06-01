@@ -3,6 +3,7 @@ import { ISsProgramasRepository } from '../../../../domain/interfaces/servicio_s
 import { IStorageService, STORAGE_SERVICE } from '../../../../domain/interfaces/storage.interface';
 import { CrearSsProgramaDto } from '../../../../dtos/requests/Servicio Social/Programas/crear_ss_programas';
 import { SsProgramasPoco } from '../../../../dtos/POCOS/servicio_social/ss_programas.poco';
+import { PeriodosEscolaresRepository } from '../../../../infrastructure/bd/repositories/catalogos/periodos_escolares.entity';
 
 @Injectable()
 export class CrearSsProgramaUseCase {
@@ -10,9 +11,11 @@ export class CrearSsProgramaUseCase {
   constructor(
     @Inject('ISsProgramasRepository')
     private readonly ssProgramasRepository: ISsProgramasRepository,
-    
+
     @Inject(STORAGE_SERVICE)
     private readonly storageService: IStorageService,
+
+    private readonly periodosRepository: PeriodosEscolaresRepository,
   ) {}
 
   async Ejecutar(
@@ -20,7 +23,6 @@ export class CrearSsProgramaUseCase {
     archivos?: { plan_trabajo?: Express.Multer.File[] },
   ): Promise<SsProgramasPoco> {
     const bucket = process.env.GARAGE_BUCKET_SERVICIO_SOCIAL;
-    const folder = `programas/${dto.nombre_programa.replace(/\s+/g, '_')}`;
 
     // 1. Validar que no exista un programa con el mismo nombre
     const programasExistentes = await this.ssProgramasRepository
@@ -34,18 +36,25 @@ export class CrearSsProgramaUseCase {
       throw new ConflictException(`Ya existe un programa con el nombre ${dto.nombre_programa}`);
     }
 
-    // 2. Subir plan_trabajo a Garage si viene
+    // 2. Obtener periodo activo y construir la carpeta
+    // Resultado: ServicioSocial/ENE-JUN/2026/Programas/Nombre_Programa
+    const periodoActivo = await this.periodosRepository.ObtenerPeriodoActivo();
+    const nombreProgramaNormalizado = dto.nombre_programa.replace(/\s+/g, '_');
+    const folder = `ServicioSocial/${periodoActivo}/Programas/${nombreProgramaNormalizado}`;
+
+    // 3. Subir plan_trabajo a Garage con nombre fijo
     let plan_trabajo_path: string | null = null;
     if (archivos?.plan_trabajo?.[0]) {
       const uploadResult = await this.storageService.upload(
         bucket,
         archivos.plan_trabajo[0],
-        folder
+        folder,
+        'plan_trabajo',  // ← nombre fijo
       );
       plan_trabajo_path = uploadResult.path;
     }
 
-    // 3. Guardar el path en PostgreSQL
+    // 4. Guardar el path en PostgreSQL
     const programaCreado = await this.ssProgramasRepository.Crear(dto, {
       plan_trabajo: plan_trabajo_path,
     });
@@ -54,7 +63,7 @@ export class CrearSsProgramaUseCase {
       throw new NotFoundException('No se pudo crear el programa');
     }
 
-    // 4. Convertir el path a presigned URL antes de retornar
+    // 5. Convertir el path a presigned URL antes de retornar
     const plan_trabajo_url = programaCreado.plan_trabajo
       ? await this.storageService.getPresignedUrl(bucket, programaCreado.plan_trabajo)
       : null;

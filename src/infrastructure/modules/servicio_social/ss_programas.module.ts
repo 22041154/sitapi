@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SsProgramasEntity } from '../../bd/entities/servicio_social/ss_programas.entity';
+import { PeriodosEscolaresEntity } from '../../bd/entities/catalogos/periodos_escolares.entity';
 import { SsOrganizacionesEntity } from '../../bd/entities/servicio_social/ss_organizaciones.entity';
 import { SsTiposProgramasEntity } from '../../bd/entities/servicio_social/ss_tipos_programas.entity';
 import { SsProgramasRepository } from '../../bd/repositories/servicio_social/ss_programas.repository';
@@ -9,6 +10,7 @@ import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/P
 import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/crear_ss_programas';
 import { EliminarSsProgramasUseCase} from '../../../application/logic/servicio_Social/Programas/eliminar_ss_programas';
 import { ActualizarSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/actualizar_ss_programas';
+import { PeriodosEscolaresRepository } from '../../bd/repositories/catalogos/periodos_escolares.entity';
 import { StorageModule } from '../storage.module'; // ← Importar StorageModule
 
 @Module({
@@ -17,8 +19,9 @@ import { StorageModule } from '../storage.module'; // ← Importar StorageModule
       SsProgramasEntity,
       SsOrganizacionesEntity,
       SsTiposProgramasEntity,
+      PeriodosEscolaresEntity,
     ]),
-    StorageModule, // ← Agregar StorageModule a imports
+    StorageModule, 
   ],
 
   providers: [
@@ -26,6 +29,7 @@ import { StorageModule } from '../storage.module'; // ← Importar StorageModule
     CrearSsProgramaUseCase,
     EliminarSsProgramasUseCase,
     ActualizarSsProgramaUseCase,
+    PeriodosEscolaresRepository,
     {
       provide: 'ISsProgramasRepository',
       useClass: SsProgramasRepository,
