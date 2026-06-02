@@ -13,20 +13,22 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+
 import {
   ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
   ApiConsumes,
+  ApiTags,
 } from '@nestjs/swagger';
 
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { RolesGuard } from '../../../infrastructure/security/auth/roles.guard';
+import { PermissionsGuard } from '../../../infrastructure/security/auth/permisions.guard';
+
 import { Roles } from '../../../infrastructure/security/auth/decorators/roles.decorator';
+import { Permissions } from '../../../infrastructure/security/auth/decorators/permisions.decorator';
 
 import { ObtenerSsDocumentosAlumnos } from '../../logic/servicio_Social/DocumentosAlumnos/obtener_ss_documentos_alumnos';
 import { CrearSsDocumentosAlumnosUseCase } from '../../logic/servicio_Social/DocumentosAlumnos/crear_ss_documentos_alumnos';
@@ -35,160 +37,157 @@ import { ActualizarSsDocumentosAlumnosUseCase } from '../../logic/servicio_Socia
 
 import { CrearSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
 import { ActualizarSsDocumentosAlumnosDto } from '../../../dtos/requests/Servicio Social/DocumentosAlumnos/actualizar_ss_documentos_alumnos.dto';
+
 import { SsDocumentosAlumnosPresenter } from '../../presenters/servicio_social/ss_documentos_alumnos.presenter';
 
-// Agrega estos imports
 import { UsuarioActual } from '../../../infrastructure/security/auth/decorators/usuario_actual.decorator';
 import { JwtPayload } from '../../../infrastructure/security/auth/intefraces/jwt_payload.interface';
+
 import { FiltroPdf } from '../../../infrastructure/security/filters/archivo_pdf.filter';
 import { ValidarPdfPipe } from '../../../infrastructure/security/pipes/validar_pdf.pipe';
 
-import { PermissionsGuard } from '../../../infrastructure/security/auth/permisions.guard';
+const storage = memoryStorage();
 
-// Configuración de Multer: archivos en memoria, sin tocar el disco
-const memoriaStorage = memoryStorage();
 const interceptorArchivos = FileFieldsInterceptor(
   [
-    { name: 'carta_presentacion',  maxCount: 1 },
-    { name: 'carta_compromiso',    maxCount: 1 },
-    { name: 'carta_aceptacion',    maxCount: 1 },
-    { name: 'seguro_facultativo',  maxCount: 1 },
+    { name: 'carta_presentacion', maxCount: 1 },
+    { name: 'carta_compromiso', maxCount: 1 },
+    { name: 'carta_aceptacion', maxCount: 1 },
+    { name: 'seguro_facultativo', maxCount: 1 },
   ],
-  { 
-    storage: memoriaStorage,
-    fileFilter: FiltroPdf,           // ← Capa 1
+  {
+    storage,
+    fileFilter: FiltroPdf,
     limits: {
-      fileSize: 5 * 1024 * 1024,    // ← 5 MB máximo por archivo
+      fileSize: 5 * 1024 * 1024,
     },
   },
 );
 
 type ArchivosDocumentos = {
   carta_presentacion?: Express.Multer.File[];
-  carta_compromiso?:   Express.Multer.File[];
-  carta_aceptacion?:   Express.Multer.File[];
+  carta_compromiso?: Express.Multer.File[];
+  carta_aceptacion?: Express.Multer.File[];
   seguro_facultativo?: Express.Multer.File[];
 };
 
 @ApiTags('Servicio Social - Documentos Alumnos')
 @ApiBearerAuth('access-token')
-@UseGuards(
-  JwtGuard,
-  RolesGuard,
-  PermissionsGuard,
-)
+@UseGuards(JwtGuard, RolesGuard, PermissionsGuard)
 @Controller('servicio-social/documentos-alumnos')
 export class SsDocumentosAlumnosController {
   constructor(
-    private readonly obtenerSsDocumentosAlumnosUseCase: ObtenerSsDocumentosAlumnos,
-    private readonly crearSsDocumentosAlumnosUseCase: CrearSsDocumentosAlumnosUseCase,
-    private readonly eliminarSsDocumentosAlumnosUseCase: EliminarSsDocumentosAlumnosUseCase,
-    private readonly actualizarSsDocumentosAlumnosUseCase: ActualizarSsDocumentosAlumnosUseCase,
+    private readonly obtenerUseCase: ObtenerSsDocumentosAlumnos,
+    private readonly crearUseCase: CrearSsDocumentosAlumnosUseCase,
+    private readonly eliminarUseCase: EliminarSsDocumentosAlumnosUseCase,
+    private readonly actualizarUseCase: ActualizarSsDocumentosAlumnosUseCase,
   ) {}
 
-  // ─── GET ─────────────────────────────────────────────────────────────────
-
   @Roles('ADMIN', 'SUPER_ADMIN')
+  @Permissions('documentos.read')
   @Get()
-  @ApiOperation({ summary: 'Obtener todos los registros de documentos' })
-  @ApiResponse({ status: 200, description: 'Registros obtenidos correctamente' })
   async ObtenerTodos() {
-    const pocos = await this.obtenerSsDocumentosAlumnosUseCase.ObtenerTodos();
-    return SsDocumentosAlumnosPresenter.PresentarLista(pocos);
+    const data = await this.obtenerUseCase.ObtenerTodos();
+    return SsDocumentosAlumnosPresenter.PresentarLista(data);
   }
 
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
+  @Permissions('documentos.read')
   @Get('id/:id')
-  @ApiOperation({ summary: 'Obtener documentos por id del registro' })
-  @ApiParam({ name: 'id', type: Number, description: 'Id del registro de documentos' })
-  async ObtenerPorId(@Param('id', ParseIntPipe) id: number) {
-    const poco = await this.obtenerSsDocumentosAlumnosUseCase.ObtenerPorId(id);
-    return SsDocumentosAlumnosPresenter.Presentar(poco);
+  async ObtenerPorId(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const data = await this.obtenerUseCase.ObtenerPorId(id);
+    return SsDocumentosAlumnosPresenter.Presentar(data);
   }
 
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
+  @Permissions('documentos.read')
   @Get('alumno/:id_alumno')
-  @ApiOperation({ summary: 'Obtener documentos por ID de alumno' })
-  @ApiParam({ name: 'id_alumno', type: Number, description: 'ID del alumno académico' })
-  async ObtenerPorIdAlumnoAcademico(
+  async ObtenerPorAlumno(
     @Param('id_alumno', ParseIntPipe) id_alumno: number,
   ) {
-    const pocos = await this.obtenerSsDocumentosAlumnosUseCase
-      .ObtenerPorIdAlumnoAcademico(id_alumno);
-    return SsDocumentosAlumnosPresenter.PresentarLista(pocos);
+    const data =
+      await this.obtenerUseCase.ObtenerPorIdAlumnoAcademico(
+        id_alumno,
+      );
+
+    return SsDocumentosAlumnosPresenter.PresentarLista(data);
   }
 
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
+  @Permissions('documentos.read')
   @Get('plan-trabajo/:id_plan_trabajo')
-  @ApiOperation({ summary: 'Obtener documentos por ID de plan de trabajo' })
-  @ApiParam({ name: 'id_plan_trabajo', type: Number, description: 'ID del plan de trabajo' })
-  async ObtenerPorIdPlanTrabajo(
-    @Param('id_plan_trabajo', ParseIntPipe) id_plan_trabajo: number,
+  async ObtenerPorPlan(
+    @Param('id_plan_trabajo', ParseIntPipe)
+    id_plan_trabajo: number,
   ) {
-    const pocos = await this.obtenerSsDocumentosAlumnosUseCase
-      .ObtenerPorIdPlanTrabajo(id_plan_trabajo);
-    return SsDocumentosAlumnosPresenter.PresentarLista(pocos);
+    const data =
+      await this.obtenerUseCase.ObtenerPorIdPlanTrabajo(
+        id_plan_trabajo,
+      );
+
+    return SsDocumentosAlumnosPresenter.PresentarLista(data);
   }
 
-  // ─── POST ────────────────────────────────────────────────────────────────
-
   @Roles('ALUMNO')
+  @Permissions('documentos.create')
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Subir documentos de un alumno' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(interceptorArchivos)
   async Crear(
-    @UsuarioActual() usuario: JwtPayload,   // ← toma el usuario del token
+    @UsuarioActual() usuario: JwtPayload,
     @Body() dto: CrearSsDocumentosAlumnosDto,
-    @UploadedFiles(ValidarPdfPipe) files: ArchivosDocumentos,
+    @UploadedFiles(ValidarPdfPipe)
+    files: ArchivosDocumentos,
   ) {
-    // Inyecta el id del alumno desde el token al DTO
-    dto.id_alumno_academico = String(usuario.idAlumnoAcademico);
-    const poco = await this.crearSsDocumentosAlumnosUseCase.Ejecutar(dto, files);
-    return SsDocumentosAlumnosPresenter.Presentar(poco);
+    dto.id_alumno_academico =
+      String(usuario.idAlumnoAcademico);
+
+    const data =
+      await this.crearUseCase.Ejecutar(
+        dto,
+        files,
+      );
+
+    return SsDocumentosAlumnosPresenter.Presentar(data);
   }
 
-  // ─── PUT ─────────────────────────────────────────────────────────────────
-
   @Roles('ALUMNO')
+  @Permissions('documentos.update')
   @Put('id/:id')
-  @ApiOperation({ summary: 'Actualizar documentos de un alumno' })
   @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'id', type: Number, description: 'ID del registro a actualizar' })
-  @ApiResponse({ status: 200, description: 'Documentos actualizados correctamente' })
-  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 404, description: 'Registro no encontrado' })
   @UseInterceptors(interceptorArchivos)
   async Actualizar(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ActualizarSsDocumentosAlumnosDto,
-    @UploadedFiles(ValidarPdfPipe) files: ArchivosDocumentos,
-    @UsuarioActual() usuario: JwtPayload,  
+    @UploadedFiles(ValidarPdfPipe)
+    files: ArchivosDocumentos,
+    @UsuarioActual() usuario: JwtPayload,
   ) {
-    const poco = await this.actualizarSsDocumentosAlumnosUseCase.Ejecutar(
-      id,
-      dto,
-      files,
-      usuario.idAlumnoAcademico,  
-    );
-    return SsDocumentosAlumnosPresenter.Presentar(poco);
+    const data =
+      await this.actualizarUseCase.Ejecutar(
+        id,
+        dto,
+        files,
+        usuario.idAlumnoAcademico,
+      );
+
+    return SsDocumentosAlumnosPresenter.Presentar(data);
   }
 
-  // ─── DELETE ──────────────────────────────────────────────────────────────
-
   @Roles('SUPER_ADMIN')
+  @Permissions('documentos.delete')
   @Delete('id/:id')
-  @ApiOperation({ summary: 'Eliminar un registro de documentos por ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID del registro a eliminar' })
-  @ApiResponse({ status: 200, description: 'Registro eliminado correctamente' })
-  @ApiResponse({ status: 404, description: 'Registro no encontrado' })
-  async Eliminar(@Param('id', ParseIntPipe) id: number) {
-    await this.eliminarSsDocumentosAlumnosUseCase.Ejecutar(id);
+  async Eliminar(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    await this.eliminarUseCase.Ejecutar(id);
+
     return {
       statusCode: 200,
-      message: `El registro de documentos con id ${id} fue eliminado correctamente.`,
+      message: `Registro ${id} eliminado correctamente`,
     };
   }
 }

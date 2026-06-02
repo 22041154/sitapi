@@ -2,15 +2,14 @@ import { LoginAlumnoResponse } from '../../../dtos/responses/auth/login_alumno.r
 import { DatosLoginAlumno } from '../../../dtos/POCOS/datos_logfn_alumno.poco';
 
 export class LoginAlumnoPresenter {
-
   static Presentar(
     datos: DatosLoginAlumno,
     accessToken: string,
     refreshToken: string,
     roles: string[],
     permisos: string[],
+    expiresInSeconds: number,   // ← nuevo parámetro
   ): LoginAlumnoResponse {
-
     const response = new LoginAlumnoResponse();
 
     response.type = 'alumnos';
@@ -24,14 +23,11 @@ export class LoginAlumnoPresenter {
     };
 
     response.roles = roles;
-
     response.permisos = permisos;
-
     response.access_token = accessToken;
-
     response.refresh_token = refreshToken;
+    response.Expires = expiresInSeconds;   // ← asignación del nuevo campo
 
     return response;
   }
-
 }

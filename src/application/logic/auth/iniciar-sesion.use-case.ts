@@ -25,10 +25,46 @@ export class IniciarSesionUseCase {
     private readonly configService: ConfigService,
   ) {}
 
+  // Método auxiliar para convertir la expiración a segundos
+  private getAccessTokenExpirationInSeconds(): number {
+    const expiresIn = this.configService.get<string>('JWT_ACCESS_EXPIRATION');
+    if (!expiresIn) {
+      throw new Error('JWT_ACCESS_EXPIRATION no está definida');
+    }
+
+    // Si es solo un número (segundos)
+    const numeric = parseInt(expiresIn, 10);
+    if (!isNaN(numeric) && expiresIn === numeric.toString()) {
+      return numeric;
+    }
+
+    // Formato "30m"
+    if (expiresIn.endsWith('m')) {
+      const minutes = parseInt(expiresIn.slice(0, -1), 10);
+      return minutes * 60;
+    }
+
+    // Formato "1h"
+    if (expiresIn.endsWith('h')) {
+      const hours = parseInt(expiresIn.slice(0, -1), 10);
+      return hours * 3600;
+    }
+
+    // Formato "3600s"
+    if (expiresIn.endsWith('s')) {
+      return parseInt(expiresIn.slice(0, -1), 10);
+    }
+
+    // Fallback: 30 minutos por defecto
+    return 1800;
+  }
+
   async Ejecutar(
     noControl: string,
     nip: string,
   ): Promise<LoginAlumnoResponse> {
+
+    const expiresInSeconds = this.getAccessTokenExpirationInSeconds();
 
     /*
     ============================================
@@ -49,8 +85,8 @@ export class IniciarSesionUseCase {
         no_control: 'superadmin',
         roles,
         permisos,
-        rol: 'SUPER_ADMIN',           // <-- NUEVO: rol singular
-        idAlumnoAcademico: null,      // <-- NUEVO: no es alumno
+        rol: 'SUPER_ADMIN',
+        idAlumnoAcademico: null,
       };
 
       const accessToken = await this.jwtService.signAsync(payload);
@@ -72,6 +108,7 @@ export class IniciarSesionUseCase {
         permisos,
         access_token: accessToken,
         refresh_token: refreshToken,
+        Expires: expiresInSeconds,
       };
     }
 
@@ -101,8 +138,8 @@ export class IniciarSesionUseCase {
         no_control: 'admin',
         roles,
         permisos,
-        rol: 'ADMIN',                 // <-- NUEVO: rol singular
-        idAlumnoAcademico: null,      // <-- NUEVO: no es alumno
+        rol: 'ADMIN',
+        idAlumnoAcademico: null,
       };
 
       const accessToken = await this.jwtService.signAsync(payload);
@@ -124,6 +161,7 @@ export class IniciarSesionUseCase {
         permisos,
         access_token: accessToken,
         refresh_token: refreshToken,
+        Expires: expiresInSeconds,
       };
     }
 
@@ -165,8 +203,8 @@ export class IniciarSesionUseCase {
       no_control: alumno.noControl,
       roles,
       permisos,
-      rol: rolPrincipal,                         // <-- NUEVO: rol singular
-      idAlumnoAcademico: alumno.id,              // <-- NUEVO: ID del alumno académico
+      rol: rolPrincipal,
+      idAlumnoAcademico: alumno.id,
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
@@ -181,13 +219,14 @@ export class IniciarSesionUseCase {
       expiresIn: refreshExpiration as any,
     });
 
-    // Usar el presenter para armar la respuesta
+    // Usar el presenter para armar la respuesta, pasando expiresInSeconds
     return LoginAlumnoPresenter.Presentar(
       datosLogin,
       accessToken,
       refreshToken,
       roles,
       permisos,
+      expiresInSeconds,
     );
   }
 }

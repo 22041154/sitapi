@@ -1,5 +1,4 @@
 export class LoginAlumnoResponse {
-
   type: string;
 
   attributes: {
@@ -18,4 +17,5 @@ export class LoginAlumnoResponse {
 
   refresh_token: string;
 
+  Expires: number;   // ← Tiempo de expiración del access_token en segundos
 }
