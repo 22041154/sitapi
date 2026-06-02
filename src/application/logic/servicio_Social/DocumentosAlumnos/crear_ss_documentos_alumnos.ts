@@ -1,8 +1,18 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+} from '@nestjs/common';
+
 import { ISsDocumentosAlumnosRepository } from '../../../../domain/interfaces/servicio_social/ss_documentos_alumnos.interface';
-import { IStorageService, STORAGE_SERVICE } from '../../../../domain/interfaces/storage.interface';
+import {
+  IStorageService,
+  STORAGE_SERVICE,
+} from '../../../../domain/interfaces/storage.interface';
+
 import { CrearSsDocumentosAlumnosDto } from '../../../../dtos/requests/Servicio Social/DocumentosAlumnos/crear_ss_documentos_alumnos.dto';
 import { SsDocumentosAlumnosPoco } from '../../../../dtos/POCOS/servicio_social/ss_documentos_alumnos.poco';
+
 import { PeriodosEscolaresRepository } from '../../../../infrastructure/bd/repositories/catalogos/periodos_escolares.entity';
 import { AlumnoDatosAcademicosRepository } from '../../../../infrastructure/bd/repositories/alumnos_datos_academicos.repositiry';
 
@@ -16,6 +26,8 @@ export class CrearSsDocumentosAlumnosUseCase {
     private readonly storageService: IStorageService,
 
     private readonly periodosRepository: PeriodosEscolaresRepository,
+
+    // 🔥 IMPORTANTE: ya NO se inyecta la clase directa en otros módulos
     private readonly alumnoRepository: AlumnoDatosAcademicosRepository,
   ) {}
 
@@ -23,13 +35,22 @@ export class CrearSsDocumentosAlumnosUseCase {
     dto: CrearSsDocumentosAlumnosDto,
     archivos: { [campo: string]: Express.Multer.File[] },
   ): Promise<SsDocumentosAlumnosPoco> {
+
     const bucket = process.env.GARAGE_BUCKET_SERVICIO_SOCIAL;
 
-    // 1. Obtener periodo activo y no_control del alumno
-    const periodoActivo = await this.periodosRepository.ObtenerPeriodoActivo();
-    const noControl = await this.alumnoRepository.ObtenerNoControlPorId(
-      Number(dto.id_alumno_academico),
-    );
+    if (!bucket) {
+      throw new Error('Bucket no configurado');
+    }
+
+    // 1. periodo activo
+    const periodoActivo =
+      await this.periodosRepository.ObtenerPeriodoActivo();
+
+    // 2. obtener no_control del alumno
+    const noControl =
+      await this.alumnoRepository.ObtenerNoControlPorId(
+        Number(dto.id_alumno_academico),
+      );
 
     if (!noControl) {
       throw new NotFoundException(
@@ -37,47 +58,47 @@ export class CrearSsDocumentosAlumnosUseCase {
       );
     }
 
-    // 2. Construir la carpeta: ServicioSocial/ENE-JUN/2026/21041305
+    // 3. carpeta lógica
     const folder = `ServicioSocial/${periodoActivo}/${noControl}`;
 
-    // 3. Subir archivos a Garage con nombre fijo por campo
-    const carta_presentacion = archivos?.carta_presentacion
-      ? (await this.storageService.upload(
-          bucket,
-          archivos.carta_presentacion[0],
-          folder,
-          'carta_presentacion',  // ← nombre fijo
-        )).path
-      : null;
+    // 4. uploads
+    const uploadFile = async (
+      file: Express.Multer.File[] | undefined,
+      name: string,
+    ) => {
+      if (!file) return null;
 
-    const carta_compromiso = archivos?.carta_compromiso
-      ? (await this.storageService.upload(
-          bucket,
-          archivos.carta_compromiso[0],
-          folder,
-          'carta_compromiso',  // ← nombre fijo
-        )).path
-      : null;
+      const uploaded = await this.storageService.upload(
+        bucket,
+        file[0],
+        folder,
+        name,
+      );
 
-    const carta_aceptacion = archivos?.carta_aceptacion
-      ? (await this.storageService.upload(
-          bucket,
-          archivos.carta_aceptacion[0],
-          folder,
-          'carta_aceptacion',  // ← nombre fijo
-        )).path
-      : null;
+      return uploaded.path;
+    };
 
-    const seguro_facultativo = archivos?.seguro_facultativo
-      ? (await this.storageService.upload(
-          bucket,
-          archivos.seguro_facultativo[0],
-          folder,
-          'seguro_facultativo',  // ← nombre fijo
-        )).path
-      : null;
+    const carta_presentacion = await uploadFile(
+      archivos?.carta_presentacion,
+      'carta_presentacion',
+    );
 
-    // 4. Guardar paths en PostgreSQL
+    const carta_compromiso = await uploadFile(
+      archivos?.carta_compromiso,
+      'carta_compromiso',
+    );
+
+    const carta_aceptacion = await uploadFile(
+      archivos?.carta_aceptacion,
+      'carta_aceptacion',
+    );
+
+    const seguro_facultativo = await uploadFile(
+      archivos?.seguro_facultativo,
+      'seguro_facultativo',
+    );
+
+    // 5. guardar en BD
     const poco = await this.documentosRepository.Crear(dto, {
       carta_presentacion,
       carta_compromiso,
@@ -85,22 +106,34 @@ export class CrearSsDocumentosAlumnosUseCase {
       seguro_facultativo,
     });
 
-    // 5. Convertir paths a presigned URLs
+    // 6. presigned URLs
     return new SsDocumentosAlumnosPoco(
       poco.id,
       poco.id_alumno_academico,
       poco.id_plan_trabajo,
       poco.carta_presentacion
-        ? await this.storageService.getPresignedUrl(bucket, poco.carta_presentacion)
+        ? await this.storageService.getPresignedUrl(
+            bucket,
+            poco.carta_presentacion,
+          )
         : null,
       poco.carta_compromiso
-        ? await this.storageService.getPresignedUrl(bucket, poco.carta_compromiso)
+        ? await this.storageService.getPresignedUrl(
+            bucket,
+            poco.carta_compromiso,
+          )
         : null,
       poco.carta_aceptacion
-        ? await this.storageService.getPresignedUrl(bucket, poco.carta_aceptacion)
+        ? await this.storageService.getPresignedUrl(
+            bucket,
+            poco.carta_aceptacion,
+          )
         : null,
       poco.seguro_facultativo
-        ? await this.storageService.getPresignedUrl(bucket, poco.seguro_facultativo)
+        ? await this.storageService.getPresignedUrl(
+            bucket,
+            poco.seguro_facultativo,
+          )
         : null,
     );
   }

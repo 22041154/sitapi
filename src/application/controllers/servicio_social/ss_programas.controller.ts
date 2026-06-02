@@ -1,10 +1,26 @@
-import { Controller, Get, Post, Put, Param, Body, ParseIntPipe, ParseBoolPipe, UseGuards, HttpCode, HttpStatus, UseInterceptors, UploadedFiles, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+  ParseBoolPipe,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFiles,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiConsumes } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
 import { JwtGuard } from '../../../infrastructure/security/auth/Jwt.guard';
 import { RolesGuard } from '../../../infrastructure/security/auth/roles.guard';
+import { PermissionsGuard } from '../../../infrastructure/security/auth/permisions.guard';
 import { Roles } from '../../../infrastructure/security/auth/decorators/roles.decorator';
 
 import { ObtenerSsProgramas } from '../../logic/servicio_Social/Programas/obtemer_ss_programas';
@@ -15,13 +31,18 @@ import { CrearSsProgramaDto } from '../../../dtos/requests/Servicio Social/Progr
 import { ActualizarSsProgramaDto } from '../../../dtos/requests/Servicio Social/Programas/avtualizar_ss_programas';
 import { SsProgramasPresenter } from '../../presenters/servicio_social/ss_programas.presenter';
 
-// Configuración de Multer: archivos en memoria, sin tocar el disco
+import { FiltroPdf } from '../../../infrastructure/security/filters/archivo_pdf.filter';
+import { ValidarPdfPipe } from '../../../infrastructure/security/pipes/validar_pdf.pipe';
+
+// Configuración de Multer: archivos en memoria, con validación de PDF y límite de 5MB
 const memoriaStorage = memoryStorage();
 const interceptorArchivos = FileFieldsInterceptor(
-  [
-    { name: 'plan_trabajo', maxCount: 1 },
-  ],
-  { storage: memoriaStorage },
+  [{ name: 'plan_trabajo', maxCount: 1 }],
+  {
+    storage: memoriaStorage,
+    fileFilter: FiltroPdf,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  },
 );
 
 type ArchivosPrograma = {
@@ -30,10 +51,9 @@ type ArchivosPrograma = {
 
 @ApiTags('Servicio Social - Programas')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard, PermissionsGuard)
 @Controller('servicio-social/programas')
 export class SsProgramasController {
-
   constructor(
     private readonly obtenerSsProgramasUseCase: ObtenerSsProgramas,
     private readonly crearSsProgramaUseCase: CrearSsProgramaUseCase,
@@ -41,126 +61,126 @@ export class SsProgramasController {
     private readonly actualizarSsProgramasUseCase: ActualizarSsProgramaUseCase,
   ) {}
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
+  // ─── GET ─────────────────────────────────────────────────────────────────
+
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get()
   @ApiOperation({ summary: 'Obtener todos los programas' })
   @ApiResponse({ status: 200, description: 'Lista de programas obtenida correctamente' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 404, description: 'No se encontraron programas' })
   async ObtenerTodos() {
     const pocos = await this.obtenerSsProgramasUseCase.ObtenerTodos();
     return SsProgramasPresenter.PresentarLista(pocos);
   }
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('vigentes')
   @ApiOperation({ summary: 'Obtener programas vigentes' })
+  @ApiResponse({ status: 200, description: 'Programas vigentes obtenidos correctamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
   async ObtenerVigentes() {
     const pocos = await this.obtenerSsProgramasUseCase.ObtenerVigentes();
     return SsProgramasPresenter.PresentarLista(pocos);
   }
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('id/:id')
-  @ApiOperation({ summary: 'Obtener programa por id' })
-  @ApiParam({ name: 'id', type: Number })
+  @ApiOperation({ summary: 'Obtener programa por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del programa' })
+  @ApiResponse({ status: 200, description: 'Programa obtenido correctamente' })
+  @ApiResponse({ status: 404, description: 'Programa no encontrado' })
   async ObtenerPorId(@Param('id', ParseIntPipe) id: number) {
     const poco = await this.obtenerSsProgramasUseCase.ObtenerPorId(id);
     return SsProgramasPresenter.Presentar(poco);
   }
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('nombre/:nombrePrograma')
   @ApiOperation({ summary: 'Obtener programas por nombre' })
+  @ApiParam({ name: 'nombrePrograma', type: String, description: 'Nombre del programa' })
+  @ApiResponse({ status: 200, description: 'Programas obtenidos correctamente' })
   async ObtenerPorNombrePrograma(@Param('nombrePrograma') nombrePrograma: string) {
     const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorNombrePrograma(nombrePrograma);
     return SsProgramasPresenter.PresentarLista(pocos);
   }
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('organizacion/:idOrganizacion')
+  @ApiOperation({ summary: 'Obtener programas por ID de organización' })
+  @ApiParam({ name: 'idOrganizacion', type: Number, description: 'ID de la organización' })
+  @ApiResponse({ status: 200, description: 'Programas obtenidos correctamente' })
   async ObtenerPorOrganizacion(@Param('idOrganizacion', ParseIntPipe) idOrganizacion: number) {
     const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorOrganizacion(idOrganizacion);
     return SsProgramasPresenter.PresentarLista(pocos);
   }
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('tipo/:idTipoPrograma')
+  @ApiOperation({ summary: 'Obtener programas por tipo' })
+  @ApiParam({ name: 'idTipoPrograma', type: Number, description: 'ID del tipo de programa' })
+  @ApiResponse({ status: 200, description: 'Programas obtenidos correctamente' })
   async ObtenerPorTipoPrograma(@Param('idTipoPrograma', ParseIntPipe) idTipoPrograma: number) {
     const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorTipoPrograma(idTipoPrograma);
     return SsProgramasPresenter.PresentarLista(pocos);
   }
 
-  /*
-    ALUMNO + ADMIN + SUPER ADMIN
-  */
   @Roles('ALUMNO', 'ADMIN', 'SUPER_ADMIN')
   @Get('modalidad/:modalidad')
+  @ApiOperation({ summary: 'Obtener programas por modalidad' })
+  @ApiParam({ name: 'modalidad', type: Boolean, description: 'true = presencial, false = virtual' })
+  @ApiResponse({ status: 200, description: 'Programas obtenidos correctamente' })
   async ObtenerPorModalidad(@Param('modalidad', ParseBoolPipe) modalidad: boolean) {
     const pocos = await this.obtenerSsProgramasUseCase.ObtenerPorModalidad(modalidad);
     return SsProgramasPresenter.PresentarLista(pocos);
   }
 
-  /*
-    ADMIN + SUPER ADMIN
-  */
+  // ─── POST ────────────────────────────────────────────────────────────────
+
   @Roles('ADMIN', 'SUPER_ADMIN')
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un nuevo programa' })
   @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201, description: 'Programa creado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o archivo no válido' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
   @UseInterceptors(interceptorArchivos)
   async Crear(
     @Body() dto: CrearSsProgramaDto,
-    @UploadedFiles() files: ArchivosPrograma,
+    @UploadedFiles(ValidarPdfPipe) files: ArchivosPrograma,
   ) {
     const poco = await this.crearSsProgramaUseCase.Ejecutar(dto, files);
     return SsProgramasPresenter.Presentar(poco);
   }
 
-  /*
-    ADMIN + SUPER ADMIN
-  */
+  // ─── PUT ─────────────────────────────────────────────────────────────────
+
   @Roles('ADMIN', 'SUPER_ADMIN')
   @Put('id/:id')
   @ApiOperation({ summary: 'Actualizar un programa' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'id', type: Number, description: 'ID del programa a actualizar' })
+  @ApiResponse({ status: 200, description: 'Programa actualizado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o archivo no válido' })
+  @ApiResponse({ status: 404, description: 'Programa no encontrado' })
   @UseInterceptors(interceptorArchivos)
   async Actualizar(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ActualizarSsProgramaDto,
-    @UploadedFiles() files: ArchivosPrograma,
+    @UploadedFiles(ValidarPdfPipe) files: ArchivosPrograma,
   ) {
     const poco = await this.actualizarSsProgramasUseCase.Ejecutar(id, dto, files);
     return SsProgramasPresenter.Presentar(poco);
   }
 
-  /*
-    ADMIN + SUPER ADMIN
-  */
+  // ─── DELETE ──────────────────────────────────────────────────────────────
+
   @Roles('ADMIN', 'SUPER_ADMIN')
   @Delete('id/:id')
   @ApiOperation({ summary: 'Eliminar un programa' })
   @ApiParam({ name: 'id', type: Number, description: 'ID del programa a eliminar' })
+  @ApiResponse({ status: 200, description: 'Programa eliminado correctamente' })
+  @ApiResponse({ status: 404, description: 'Programa no encontrado' })
   async Eliminar(@Param('id', ParseIntPipe) id: number) {
     await this.eliminarSsProgramasUseCase.Ejecutar(id);
     return {

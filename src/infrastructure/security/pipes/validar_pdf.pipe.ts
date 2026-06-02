@@ -3,25 +3,35 @@ import {
   Injectable,
   BadRequestException,
 } from '@nestjs/common';
-import { fileTypeFromBuffer } from 'file-type';
 
 @Injectable()
 export class ValidarPdfPipe implements PipeTransform {
-  async transform(files: { [campo: string]: Express.Multer.File[] }) {
-    if (!files) return files;
+
+  async transform(
+    files: { [campo: string]: Express.Multer.File[] },
+  ) {
+
+    if (!files) {
+      return files;
+    }
 
     for (const campo of Object.keys(files)) {
+
       const archivo = files[campo][0];
 
-      const tipo = await fileTypeFromBuffer(archivo.buffer);
+      const esPdf =
+        archivo.buffer
+          .subarray(0, 4)
+          .toString('ascii') === '%PDF';
 
-      if (!tipo || tipo.mime !== 'application/pdf') {
+      if (!esPdf) {
         throw new BadRequestException(
-          `El archivo en "${campo}" no es un PDF válido aunque tenga extensión .pdf`,
+          `El archivo en "${campo}" no es un PDF válido.`,
         );
       }
     }
 
     return files;
   }
+
 }

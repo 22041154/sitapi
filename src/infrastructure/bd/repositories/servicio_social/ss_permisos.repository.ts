@@ -61,8 +61,7 @@ export class SsPermisosRepository implements ISsPermisosRepository {
       throw new NotFoundException(`No se encontró el permiso con id ${id}`);
     }
     if (dto.permiso !== undefined) entity.permiso = dto.permiso;
-    if (dto.descripcion !== undefined) entity.descripcion = dto.descripcion;
-
+    
     const entityActualizada = await this.ssPermisosRepository.save(entity);
   
     return this.MapearEntidadADominio(entityActualizada); 

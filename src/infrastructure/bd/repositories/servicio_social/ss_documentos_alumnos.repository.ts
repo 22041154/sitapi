@@ -97,9 +97,7 @@ export class SsDocumentosAlumnosRepository implements ISsDocumentosAlumnosReposi
       throw new NotFoundException(`No se encontró el registro de documentos con id ${id}`);
     }
 
-    if (dto.id_alumno_academico !== undefined) {
-      entity.id_alumno_academico = Number(dto.id_alumno_academico);
-    }
+    
     if (dto.id_plan_trabajo !== undefined) {
       entity.id_plan_trabajo = Number(dto.id_plan_trabajo);
     }

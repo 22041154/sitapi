@@ -1,17 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { SsProgramasEntity } from '../../bd/entities/servicio_social/ss_programas.entity';
 import { PeriodosEscolaresEntity } from '../../bd/entities/catalogos/periodos_escolares.entity';
 import { SsOrganizacionesEntity } from '../../bd/entities/servicio_social/ss_organizaciones.entity';
 import { SsTiposProgramasEntity } from '../../bd/entities/servicio_social/ss_tipos_programas.entity';
-import { SsProgramasRepository } from '../../bd/repositories/servicio_social/ss_programas.repository';
+
 import { SsProgramasController } from '../../../application/controllers/servicio_social/ss_programas.controller';
+
 import { ObtenerSsProgramas } from '../../../application/logic/servicio_Social/Programas/obtemer_ss_programas';
 import { CrearSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/crear_ss_programas';
-import { EliminarSsProgramasUseCase} from '../../../application/logic/servicio_Social/Programas/eliminar_ss_programas';
+import { EliminarSsProgramasUseCase } from '../../../application/logic/servicio_Social/Programas/eliminar_ss_programas';
 import { ActualizarSsProgramaUseCase } from '../../../application/logic/servicio_Social/Programas/actualizar_ss_programas';
+
+import { SsProgramasRepository } from '../../bd/repositories/servicio_social/ss_programas.repository';
 import { PeriodosEscolaresRepository } from '../../bd/repositories/catalogos/periodos_escolares.entity';
-import { StorageModule } from '../storage.module'; // ← Importar StorageModule
+
+import { StorageModule } from '../storage.module';
 
 @Module({
   imports: [
@@ -21,8 +26,10 @@ import { StorageModule } from '../storage.module'; // ← Importar StorageModule
       SsTiposProgramasEntity,
       PeriodosEscolaresEntity,
     ]),
-    StorageModule, 
+    StorageModule,
   ],
+
+  controllers: [SsProgramasController],
 
   providers: [
     ObtenerSsProgramas,
@@ -34,16 +41,6 @@ import { StorageModule } from '../storage.module'; // ← Importar StorageModule
       provide: 'ISsProgramasRepository',
       useClass: SsProgramasRepository,
     },
-  ],
-
-  controllers: [
-    SsProgramasController
-  ],
-
-  exports: [
-    ObtenerSsProgramas,
-    CrearSsProgramaUseCase,
-    EliminarSsProgramasUseCase,
   ],
 })
 export class SsProgramasModule {}

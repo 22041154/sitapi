@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { AlumnoDatosAcademicosEntity } from '../entities/alumnos_datos_academicos.entity';
 import { AlumnosDatosPersonalesEntity } from '../entities/aluumnos_datos_personales.entity';
 import { CarrerasEntity } from '../entities/carreras.entity';
+import { SsPermisosEntity } from '../entities/servicio_social/ss_permisos.entity';
+import { SsRolesPermisosEntity } from '../entities/servicio_social/ss_roles_permisos.entity';
 
 import { AlumnoDatosAcademicos } from '../../../dtos/POCOS/alumnos_datos_academicos.entity';
 import { DatosLoginAlumno } from '../../../dtos/POCOS/datos_logfn_alumno.poco';
@@ -18,6 +20,12 @@ export class AlumnoDatosAcademicosRepository
   constructor(
     @InjectRepository(AlumnoDatosAcademicosEntity)
     private readonly alumnoRepository: Repository<AlumnoDatosAcademicosEntity>,
+
+    @InjectRepository(SsPermisosEntity)
+    private readonly permisosRepository: Repository<SsPermisosEntity>,
+
+    @InjectRepository(SsRolesPermisosEntity)
+    private readonly rolesPermisosRepository: Repository<SsRolesPermisosEntity>,
   ) {}
 
   private MapearEntidadADominio(
@@ -108,89 +116,48 @@ export class AlumnoDatosAcademicosRepository
     permisos: string[];
   }> {
 
-    /*
-      TEMPORAL:
-      Roles hardcodeados mientras no exista
-      tabla usuario ↔ rol en BD.
-    */
+    const permisos = await this.rolesPermisosRepository
+      .createQueryBuilder('rp')
 
-    let roles: string[] = [];
-    let permisos: string[] = [];
+      .innerJoin(
+        SsPermisosEntity,
+        'p',
+        'p.id = rp.id_ss_permiso',
+      )
 
-    /*
-      SUPER ADMIN
-    */
-    if (
-      noControl === 'admin'
-      || noControl === '20230001'
-    ) {
+      .select(
+        'p.permiso',
+        'permiso',
+      )
 
-      roles = ['SUPER_ADMIN'];
+      .where(
+        'rp.id_ss_rol = :rolId',
+        { rolId: 3 },
+      )
 
-      permisos = [
-        '*',
-      ];
-
-      return {
-        roles,
-        permisos,
-      };
-    }
-
-    /*
-      ADMIN
-    */
-    if (
-      noControl === '20230002'
-    ) {
-
-      roles = ['ADMIN'];
-
-      permisos = [
-        'usuarios.read',
-        'usuarios.create',
-        'usuarios.update',
-
-        'programas.read',
-        'programas.create',
-        'programas.update',
-
-        'seguimientos.read',
-        'seguimientos.update',
-      ];
-
-      return {
-        roles,
-        permisos,
-      };
-    }
-
-    /*
-      ALUMNO
-    */
-    roles = ['ALUMNO'];
-
-    permisos = [
-      'perfil.read',
-      'perfil.update',
-
-      'documentos.read',
-      'documentos.create',
-
-      'seguimientos.read',
-    ];
+      .getRawMany();
 
     return {
-      roles,
-      permisos,
+      roles: ['ALUMNO'],
+      permisos: permisos.map(
+        (permiso) => permiso.permiso,
+      ),
     };
   }
 
-  async ObtenerNoControlPorId(id: number): Promise<string | null> {
+  async ObtenerNoControlPorId(
+    id: number,
+  ): Promise<string | null> {
+
     const entity = await this.alumnoRepository.findOne({
-      where: { id },
+      where: {
+        id,
+      },
     });
-    return entity ? entity.no_control : null;
+
+    return entity
+      ? entity.no_control
+      : null;
   }
 
 }

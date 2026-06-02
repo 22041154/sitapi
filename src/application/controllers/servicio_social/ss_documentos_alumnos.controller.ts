@@ -43,6 +43,8 @@ import { JwtPayload } from '../../../infrastructure/security/auth/intefraces/jwt
 import { FiltroPdf } from '../../../infrastructure/security/filters/archivo_pdf.filter';
 import { ValidarPdfPipe } from '../../../infrastructure/security/pipes/validar_pdf.pipe';
 
+import { PermissionsGuard } from '../../../infrastructure/security/auth/permisions.guard';
+
 // Configuración de Multer: archivos en memoria, sin tocar el disco
 const memoriaStorage = memoryStorage();
 const interceptorArchivos = FileFieldsInterceptor(
@@ -70,7 +72,11 @@ type ArchivosDocumentos = {
 
 @ApiTags('Servicio Social - Documentos Alumnos')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtGuard, RolesGuard)
+@UseGuards(
+  JwtGuard,
+  RolesGuard,
+  PermissionsGuard,
+)
 @Controller('servicio-social/documentos-alumnos')
 export class SsDocumentosAlumnosController {
   constructor(
